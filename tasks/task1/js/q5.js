@@ -37,6 +37,7 @@ let cercle = {
     x: 200,
     y: 200,
     radius: 10,
+    radiusMax: 200,
     r: 255,
     g: 255,
     b: 255,
@@ -59,11 +60,11 @@ function draw() {
     displaySquare();
     // let counterCopy = counter;
     while (counter >= 1 && counter <= 10) {
-        drawEllipse();
-        console.log(cercle.radius);
-        // cercle.radius += 10;
-        // ellipseAlpha += 25;
-        // counter--;
+        drawEllipse()++;
+        console.log(cercle);
+        cercle.radius += 10;
+        ellipseAlpha += 25;
+        counter--;
 
     }
 }
@@ -85,8 +86,6 @@ function drawEllipse() {
 function mouseClicked() {
     counter += 1;
     console.log(counter);
-    cercle.radius += 10;
-    ellipseAlpha += 25;
 
 
 }
