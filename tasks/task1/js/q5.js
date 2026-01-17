@@ -37,58 +37,64 @@ let cercle = {
     x: 200,
     y: 200,
     radius: 10,
-    radiusMax: 200,
     r: 255,
     g: 255,
     b: 255,
+    // t: 20,
 };
 
-let c;
-let ellipseAlpha;
+// let c;
+// let ellipseAlpha;
+
 function setup() {
     console.log("go")
     createCanvas(400, 400);
-    c = [cercle.r, cercle.g, cercle.b];
-
+    background(0);
 }
 
-
-
 function draw() {
-    background(0);
-    ellipseAlpha = alpha(c);
+
     displaySquare();
     // let counterCopy = counter;
+    //  let counterCopy = counter;
     while (counter >= 1 && counter <= 10) {
-        drawEllipse()++;
-        console.log(cercle);
-        cercle.radius += 10;
-        ellipseAlpha += 25;
+        // c = color(cercle.r, cercle.g, cercle.b, alpha);
+        // ellipseAlpha = alpha(c);
+        // drawEllipse();
+        let alpha = 50;
+        console.log(alpha);
+        stroke(255);
+        fill(cercle.r, cercle.g, cercle.b, alpha);
+        ellipse(cercle.x, cercle.y, cercle.radius);
+        cercle.radius += 20;
+        alpha += 20;
         counter--;
 
     }
+    // drawEllipse();
 }
 function displaySquare() {
     push();
+    noStroke();
     fill(square.r, square.g, square.b);
     rect(square.x, square.y, square.w, square.h);
     pop();
 }
-function drawEllipse() {
+function displaySquare() {
     push();
-    stroke(255);
-    fill(ellipseAlpha);
-    ellipse(cercle.x, cercle.y, cercle.radius);
-
+    noStroke();
+    fill(square.r, square.g, square.b);
+    rect(square.x, square.y, square.w, square.h);
     pop();
-
 }
 function mouseClicked() {
     counter += 1;
+    if (checkCollisionWithSquare()) {
+        counter += 1;
+    }
     console.log(counter);
-
-
 }
+
 function mouseMoved() {
     if (checkCollisionWithSquare()) {
         square.r = 255;
