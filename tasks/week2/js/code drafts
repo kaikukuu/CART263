@@ -1,0 +1,63 @@
+ // Modify attributes
+    //First: adding / removing from the classList:
+
+    document.querySelector(".square_shape").classList.remove("square_shape"); //first one only
+    document.querySelector("p span").classList.add("change_span");
+
+    // Second: modifying attributes using the setAttribute() method
+
+    document.querySelectorAll(".another_class")[0].setAttribute("id", "newTest");
+    console.log(document.querySelectorAll(".another_class")[0]);
+
+    // Third: remove attributes using the removeAttribute() method i.e.:
+
+    //second elements grandparent
+    let element = document.querySelectorAll("span")[1].parentElement.parentElement
+    element.removeAttribute("id")
+    console.log(element)
+
+    // Fourth: let's dynamically change the style attribute of an element. Note that you can either add anew or modify:
+
+    //add
+    document.querySelector("#four").style.background = "cornflowerBlue";
+    document.querySelector("#four").style.borderColor = "darkblue";
+    //modify
+    document.querySelector("#one").style.background = "pink";
+    document.querySelector("#one").style.borderColor = "darkblue";
+
+    // Adding elements to the DOM
+
+    // First create the element(element node): using the createElement() method.
+    // Then append this new element to an existing element.
+
+    // The following example demonstrates the appendChild() method which adds the element at the end of the parent.Then, the next example will demonstrate the insertBefore() method which adds the new element before an existing element.First: comment out all the example code within the setup().Then add the following:
+
+    //two steps to add a new element to the DOM:
+
+    //new element
+    let newDiv = document.createElement("div");
+    newDiv.classList.add("square_shape");
+    newDiv.innerHTML = " NEW ELEMENT ";
+    newDiv.style.backgroundColor = "purple";
+    // access parent element
+    let parentElement = document.querySelector(".wrapper_flex_box")
+    parentElement.appendChild(newDiv)
+
+    // then:
+
+    let newDivTwo = document.createElement("div");
+    newDivTwo.classList.add("square_shape");
+    newDivTwo.innerHTML = " NEW ELEMENT TWO ";
+    newDivTwo.style.backgroundColor = "yellow";
+    newDivTwo.querySelector("p").style.color = "black"
+    // access parent element
+    let sibling = document.querySelector("#three")
+    let parentElementAgain = document.querySelector(".wrapper_flex_box")
+    parentElementAgain.insertBefore(newDivTwo, sibling);
+
+    // Removing elements from the DOM
+    // to remove an element - you need to access the parent element first - then call removeChild() on that parent element - passing in the element to be removed as the argument:
+
+    let parentElementToRemoveFrom = document.querySelector(".wrapper_flex_box")
+    let toRemove = document.getElementById("six");
+    parentElementToRemoveFrom.removeChild(toRemove);
