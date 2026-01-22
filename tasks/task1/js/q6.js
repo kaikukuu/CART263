@@ -8,11 +8,38 @@
 
 "use strict";
 
+const TEXT_STRING = "test";
+const TEXT_SIZE = 28;
+const TEXT_SPACING = 20;
+
 function setup() {
     console.log("go")
-
+    createCanvas(600, 600);
 }
 
 function draw() {
+    background(0);
+    fill(255);
+    textSize(TEXT_SIZE);
+    textAlign(CENTER, CENTER);
+
+    // center text
+    text(TEXT_STRING, width / 2, height / 2);
+
+    // for loop 0 to 9 
+    for (let i = 0; i < 10; i++) {
+        let x = (i * TEXT_SPACING) + TEXT_SPACING;
+        let y = TEXT_SPACING;
+        text(i, x, y);
+    }
+
+    // for loop 15 to 1 
+    for (let i = 15; i >= 1; i--) {
+        let x = TEXT_SPACING;
+        let y = 1.5 * (i * TEXT_SPACING) + TEXT_SPACING;
+        text(i, x, y);
+    }
+
+    noLoop(); // Stop draw loop since we only need to draw once
 
 }
