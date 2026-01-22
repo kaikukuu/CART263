@@ -146,7 +146,7 @@ function setup() {
     /***CODE */
     let colors = ['red', 'blue', 'green', 'orange'];
     let innerContainers = document.getElementsByClassName("inner-container");
-    for (let i=0;i < colors.length;i++) {
+    for (let i = 0; i < colors.length; i++) {
         innerContainers[i].style.backgroundColor = colors[i];
     }
 
@@ -168,12 +168,29 @@ function setup() {
     /* 1H: Iterate through the allPTagsThree array and call customCreateElement(), 
     passing the current allPTagsThree element as the parent with each iteration.*/
     /***CODE */
+    allPTagsThree = document.getElementsByTagName("p");
 
+    function customCreateElement(parent) {
+        //body 
+        let newParagraph = document.createElement("p");
+        newParagraph.textContent = "using create Element";
+        newParagraph.style.backgroundColor = "green";
+        newParagraph.style.color = "white";
+        parent.appendChild(newParagraph);
+    }
+
+    for (let i = 0; i < allPTagsThree.length; i++) {
+        customCreateElement(allPTagsThree[i]);
+    }
 
     /***EXPLANATION::
+     * First we access all paragraph elements "p" and store them in a variable called allPTagsThree that can be accessed as an array.
+     * Then we create a function called customCreateElement that takes a parent element as an argument and creates a new paragraph element with specified text and styles.
+     * Inside the function, we create a new paragraph element using document.createElement("p"), set its text content to "using create Element", set its background color to green, and set its text color to white. Ultimately, we append this new paragraph element to the parent element passed as an argument.
      * 
-     * 
-     */
+     * We then iterate through the allPTagsThree array and call the customCreateElement function for each paragraph element, passing the current paragraph as the parent.
+     *
+     *result: Each paragraph element on the page will have a new paragraph appended to it with the specified text and styles.
 
     /*************************************** */
     /* 2: GRID OF BOXES */
@@ -196,41 +213,77 @@ function setup() {
         otherwise lat it have the content `ODD`.*/
 
     /***CODE */
+    function customNewBoxCreate(parent) { //body 
+        let newDiv = document.createElement("div");
+        newDiv.className = "testDiv";
+        parent.appendChild(newDiv);
+        return newDiv;
+    }
+    for (i = 0; i < 10; i++) {
+        for (j = 0; j < 10; j++) {
+            let returnedDiv = customNewBoxCreate(document.getElementById("new-grid"));
+
+            /***EXPLANATION::
+             * 
+             * 
+             */
+
+            /*************************************** */
+            /* 3: GRID OF BOXES II */
+
+            /* 3A: Create ANOTHER nested for loop - in order to generate a new grid ...
+                USE the same customNewBoxCreate function..., the only difference is that the parent element 
+                for each of these new divs is the element whose id is `new-grid-three`. */
+            /* 3B: Then: write the code to check when a column is a multiple of 3 (no remainder),
+            
+                when it is a column where the remainder is 1 or when the remainder is 2 ... 
+                HINT:: look up the % operator.. */
+            /* 3C: Then for each of the above cases: give the new divs in the first case a background of red,
+                    then the second a background of orange and the third yellow. */
+            /*  3D: Finally, let each div contain the text content representing the associated remainder
+                when dividing by three. */
+
+            /***CODE */
+            //if i%3 ===0 ... , else if i%3 ===1 ... , else ... if i%3 ===2 ...
+
+            function customNewBoxCreate(parent) { //body 
+                let newDiv = document.createElement("div");
+                newDiv.className = "testDiv";
+                parent.appendChild(newDiv);
+                return newDiv;
+            }
+            for (i = 0; i < 10; i++) {
+                for (j = 0; j < 10; j++) {
+                    let returnedDiv = customNewBoxCreate(document.getElementById("new-grid"));
+
+                    let returnedDivThree = customNewBoxCreate(document.getElementById("new-grid-three"));
+                    returnedDivThree.style.left = (j * 22) + "px";
+                    returnedDivThree.style.top = (i * 22) + "px";
+
+                    if (i % 3 === 0) {
+                        returnedDiv.style.backgroundColor = "white";
+                        returnedDiv.textContent = "";
+                    } else if (i % 3 === 1) {
+                        returnedDiv.style.backgroundColor = "purple";
+                        returnedDiv.textContent = "ODD";
+                    } else {
+                        returnedDiv.style.backgroundColor = "blue";
+                        returnedDiv.textContent = "THIRD";
+                    }
 
 
-    /***EXPLANATION::
-     * 
-     * 
-     */
 
-    /*************************************** */
-    /* 3: GRID OF BOXES II */
+                    /***EXPLANATION::
+                     * 
+                     * 
+                     */
 
-    /* 3A: Create ANOTHER nested for loop - in order to generate a new grid ... 
-        USE the same customNewBoxCreate function..., the only difference is that the parent element 
-        for each of these new divs is the element whose id is `new-grid-three`. */
-    /* 3B: Then: write the code to check when a column is a multiple of 3 (no remainder), 
-        when it is a column where the remainder is 1 or when the remainder is 2 ... 
-        HINT:: look up the % operator.. */
-    /* 3C: Then for each of the above cases: give the new divs in the first case a background of red, 
-            then the second a background of orange and the third yellow. */
-    /*  3D: Finally, let each div contain the text content representing the associated remainder 
-        when dividing by three. */
-
-    /***CODE */
-
-
-    /***EXPLANATION::
-     * 
-     * 
-     */
-
-    /*************************************** */
-    /*** END PART THREE CREATE */
-    /*************************************** */
+                    /*************************************** */
+                    /*** END PART THREE CREATE */
+                    /*************************************** */
 
 
 
 
 
-}
+                }
