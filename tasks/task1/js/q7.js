@@ -9,12 +9,51 @@
 // Switch circles / squares on mouse click(odd row SQUARES and even row CIRCLES)..and vice versa
 
 "use strict";
+// const CIRCLE= {
+//     circle(50, 50, 25);
+// }
+
+let shapeSize = 50;            // multiple of 5, change ONLY this
+let cols, rows;
+
+let shapeColor;                // shared random color
+let drawCircles = true;        // toggle circles / squares
 
 function setup() {
     console.log("go")
-
+    createCanvas(600, 600);
+    cols = width / shapeSize;
+    rows = height / shapeSize;
+    shapeColor = color(random(255), random(255), random(255));
 }
 
 function draw() {
+    background(0);
+    noStroke();
+    fill(shapeColor);
 
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            let x = col * shapeSize + shapeSize / 2;
+            let y = row * shapeSize + shapeSize / 2;
+
+            if (drawCircles) {
+                ellipse(x, y, shapeSize * 0.8);
+            } else {
+                rectMode(CENTER);
+                rect(x, y, shapeSize * 0.8, shapeSize * 0.8);
+            }
+}
+    }
+}
+
+//interaction functions
+function keyPressed() {
+    if (key === ' ') {
+        shapeColor = color(random(255), random(255), random(255));
+    }
+}
+
+function mousePressed() {
+    drawCircles = !drawCircles;
 }
