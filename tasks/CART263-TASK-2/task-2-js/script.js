@@ -165,8 +165,7 @@ function setup() {
     /* 1E:  Set the background of this paragraph element to be green */
     /* 1F:  Set the color of the text in this paragraph element to be white */
     /* 1G: Append this new element to the parent variable within the function. */
-    /* 1H: Iterate through the allPTagsThree array and call customCreateElement(), 
-    passing the current allPTagsThree element as the parent with each iteration.*/
+    /* 1H: Iterate through the allPTagsThree array and call customCreateElement(), passing the current allPTagsThree element as the parent with each iteration.*/
     /***CODE */
     allPTagsThree = document.getElementsByTagName("p");
 
@@ -184,9 +183,9 @@ function setup() {
     }
 
     /***EXPLANATION::
-     * First we access all paragraph elements "p" and store them in a variable called allPTagsThree that can be accessed as an array.
+     * First we access all paragraph elements "p" and store them in a variable called allPTagsThree that can be accessed as an array/an iterable object.
      * Then we create a function called customCreateElement that takes a parent element as an argument and creates a new paragraph element with specified text and styles.
-     * Inside the function, we create a new paragraph element using document.createElement("p"), set its text content to "using create Element", set its background color to green, and set its text color to white. Ultimately, we append this new paragraph element to the parent element passed as an argument.
+     * Inside the function, we create a new paragraph element using document.createElement("p"), set its text content to "using create Element", set its background color green, and text color to white. Ultimately, we append this new paragraph element to the parent element passed as an argument.
      * 
      * We then iterate through the allPTagsThree array and call the customCreateElement function for each paragraph element, passing the current paragraph as the parent.
      *
@@ -195,7 +194,7 @@ function setup() {
     /*************************************** */
     /* 2: GRID OF BOXES */
     /* 2A: Create another new function: function customNewBoxCreate(parent){ //body }*/
-    /* 2B: In the body of customNewBoxCreate create a new div element, that has the class testDiv. 
+    /* 2B: In the body of customNewBoxCreate create a new div element, that has the class testDiv.
     /* 2C:Then append this new element to the parent variable within the function. 
     /* 2D:Finally, return</code> this new element */
     /* 2E:Create a nested for loop (for rows and columns) to iterate through 10 columns and 10 rows (just like the JS Review :)). 
@@ -222,68 +221,85 @@ function setup() {
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 10; j++) {
             let returnedDiv = customNewBoxCreate(document.getElementById("new-grid"));
+            returnedDiv.style.left = (j * 22) + "px";
+            returnedDiv.style.top = (i * 22) + "px";
 
-            /***EXPLANATION::
-             * 
-             * 
-             */
-
-            /*************************************** */
-            /* 3: GRID OF BOXES II */
-
-            /* 3A: Create ANOTHER nested for loop - in order to generate a new grid ...
-                USE the same customNewBoxCreate function..., the only difference is that the parent element 
-                for each of these new divs is the element whose id is `new-grid-three`. */
-            /* 3B: Then: write the code to check when a column is a multiple of 3 (no remainder),
-            
-                when it is a column where the remainder is 1 or when the remainder is 2 ... 
-                HINT:: look up the % operator.. */
-            /* 3C: Then for each of the above cases: give the new divs in the first case a background of red,
-                    then the second a background of orange and the third yellow. */
-            /*  3D: Finally, let each div contain the text content representing the associated remainder
-                when dividing by three. */
-
-            /***CODE */
-            //if i%3 ===0 ... , else if i%3 ===1 ... , else ... if i%3 ===2 ...
-
-            function customNewBoxCreate(parent) { //body 
-                let newDiv = document.createElement("div");
-                newDiv.className = "testDiv";
-                parent.appendChild(newDiv);
-                return newDiv;
+            //BONUS I and II 
+            if (i % 2 === 0) {
+                returnedDiv.style.backgroundColor = "white";
+                returnedDiv.textContent = "EVEN";
+            } else {
+                returnedDiv.style.backgroundColor = "purple";
+                returnedDiv.textContent = "ODD";
             }
-            for (i = 0; i < 10; i++) {
-                for (j = 0; j < 10; j++) {
-                    let returnedDiv = customNewBoxCreate(document.getElementById("new-grid"));
+        }
+    }
 
-                    let returnedDivThree = customNewBoxCreate(document.getElementById("new-grid-three"));
-                    returnedDivThree.style.left = (j * 22) + "px";
-                    returnedDivThree.style.top = (i * 22) + "px";
+    /***EXPLANATION::
+     * Reference for code and concepts used:
+     * https://codesignal.com/learn/courses/web-development-with-html-css-and-javascript/lessons/interactive-web-development-with-javascript-and-dom
+     *
+     * first we create a function called customNewBoxCreate that takes a parent element as an argument and creates a new div element with the class name "testDiv".
+     * Inside the function, we create a new div element using document.createElement("div"), set its class name to "testDiv", append it to the parent element passed as an argument, and return the new div element.
+     *
+     * Next, we create a nested for loop to iterate through 10 rows and 10 columns. In each iteration of the inner loop, we call the customNewBoxCreate function, passing the element with the id "new-grid" as the parent.
+     * We then set the left and top styles of the returned div element to position it correctly in the grid based on the current row (i) and column (j) indices.
+     *
+     * For the bonus tasks, we check if the current row index (i) is even or odd using the modulo operator (%). If it's even, i=0, we set the background color of the div to white and its text content to "EVEN". If it's odd, i=1, we set the background color to purple and its text content to "ODD".
+     */
+    /*************************************** */
+    /* 3: GRID OF BOXES II */
+    /* 3A: Create ANOTHER nested for loop - in order to generate a new grid ...
+        USE the same customNewBoxCreate function..., the only difference is that the parent element
+        for each of these new divs is the element whose id is `new-grid-three`. */
+    /* 3B: Then: write the code to check when a column is a multiple of 3 (no remainder),when it is a column where the remainder is 1 or when the remainder is 2 ...
+        HINT:: look up the % operator.. */
+    /* 3C: Then for each of the above cases: give the new divs in the first case a background of red,
+            then the second a background of orange and the third yellow. */
+    /*  3D: Finally, let each div contain the text content representing the associated remainder
+        when dividing by three. */
+    /***CODE */
+    //if i%3 ==0 ... , else if i%3 ==1 ... , else ... if i%3 ===2 ...
+    function customNewBoxCreate(parent) {
+        let newDiv = document.createElement("div");
+        newDiv.className = "testDiv";
+        parent.appendChild(newDiv);
+        return newDiv;
+    }
+    for (i = 0; i <= 10; i++) {
+        for (j = 0; j < 10; j++) {
+            let returnedDiv = customNewBoxCreate(document.getElementById("new-grid"));
 
-                    if (i % 3 === 0) {
-                        returnedDiv.style.backgroundColor = "white";
-                        returnedDiv.textContent = "";
-                    } else if (i % 3 === 1) {
-                        returnedDiv.style.backgroundColor = "purple";
-                        returnedDiv.textContent = "ODD";
-                    } else {
-                        returnedDiv.style.backgroundColor = "blue";
-                        returnedDiv.textContent = "THIRD";
-                    }
+            let returnedDivThree = customNewBoxCreate(document.getElementById("new-grid-three"));
+            returnedDivThree.style.left = (j * 22) + "px";
+            returnedDivThree.style.top = (i * 22) + "px";
+
+            if (i % 3 === 0) {
+                returnedDiv.style.backgroundColor = "white";
+                returnedDiv.textContent = "remainder: 0";
+            } else if (i % 3 === 1) {
+                returnedDiv.style.backgroundColor = "purple";
+                returnedDiv.textContent = "remainder: 1";
+            } else {
+                returnedDiv.style.backgroundColor = "blue";
+                returnedDiv.textContent = "remainder: 2";
+            }
+        }
+    }
+
+    /***EXPLANATION::
+     * Similar to the previous grid of boxes, we create a nested for loop to generate a grid of div elements.
+     * We use the same customNewBoxCreate function to create new div elements, but this time we append them to the element with the id "new-grid-three".
+     * Inside the nested loop, we check the remainder of the row index (i) when divided by 3 using the modulo (%) operator to determine the background color and text content of each div.
+     * 
+     */
+
+    /*************************************** */
+    /*** END PART THREE CREATE */
+    /*************************************** */
 
 
 
-                    /***EXPLANATION::
-                     * 
-                     * 
-                     */
-
-                    /*************************************** */
-                    /*** END PART THREE CREATE */
-                    /*************************************** */
 
 
-
-
-
-                }
+}
