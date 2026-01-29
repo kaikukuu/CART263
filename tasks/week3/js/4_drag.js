@@ -10,6 +10,7 @@ function setup() {
         // The dataTransfer.setData() method sets the data type and the value of the dragged data
         event.dataTransfer.setData("objDraggedID", event.target.id);
     }
+    //
     window.addEventListener("dragstart", handleDragging);
 
     let handleDraggingStop = function (event) {
@@ -19,6 +20,7 @@ function setup() {
         // HERE - this refers to the window
         console.log(this);
     };
+    //
     window.addEventListener("dragend", handleDraggingStop);
 
     /** NEW:: TO HANDLE DROPPING **/
@@ -34,6 +36,7 @@ function setup() {
             event.target.appendChild(document.getElementById(theObj));
         }
     }
+    //
     window.addEventListener("drop", handleDrop);
 
     // IMPORTANT::By default, data/elements cannot be dropped in other elements.
