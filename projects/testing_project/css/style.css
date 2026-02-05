@@ -1,11 +1,12 @@
 * {
     margin: 0;
     padding: 0;
+    background-color: aliceblue;
 }
 
 body {
     background: rgb(49, 49, 49);
-    color: white;
+    color: black;
     font-family: 'Roboto', sans-serif;
     position: relative;
 
@@ -33,7 +34,7 @@ div:hover {
     cursor: pointer;
 }
 
-.intro-section {
+/* .intro-section {
     background-color: rgba(214, 110, 239, 1.0);
     padding: 10px;
     width: calc(98% - 20px);
@@ -111,10 +112,10 @@ div:hover {
 
 .s3-section h2 {
     text-align: center;
-}
+} */
 
-/*** BUBBLE BUTTOn ****/
-#bubbleButton {
+/*** BUTTON ****/
+#Button {
     padding: 5px;
     background-color: rgb(158, 153, 163);
     width: max-content;
