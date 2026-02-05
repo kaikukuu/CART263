@@ -4,7 +4,7 @@ function setup_C() {
   console.log("in c");
   /**************************************************** */
   //get the buttons
-  activateButtons(`#TEAM_C`, "ani_canvC",aniA,aniB,aniC,aniD);
+  activateButtons(`#TEAM_C`, "ani_canvC", aniA, aniB, aniC, aniD);
 
   /**************** ANI A ************************************ */
   /** PUT ALL YOUR CODE FOR INTERACTIVE PATTERN A INSIDE HERE */
@@ -24,9 +24,11 @@ function setup_C() {
 
   function aniA(parentCanvas) {
     console.log("in ani-A -teamC");
+
+
   }
-  
-  
+
+
 
 
   /****************ANI B ************************************ */
@@ -46,8 +48,8 @@ function setup_C() {
    * **/
 
   function aniB(parentCanvas) {
-      console.log("in ani-B -teamC");
-    
+    console.log("in ani-B -teamC");
+
   }
   /****************ANI C ************************************ */
   /** PUT ALL YOUR CODE FOR INTERACTIVE PATTERN C INSIDE HERE */
@@ -70,26 +72,99 @@ function setup_C() {
    */
 
   function aniC(parentCanvas) {
-      console.log("in ani-C -teamC");
+    console.log("in ani-C -teamC");
+
+    //set background color  of canvas
+    parentCanvas.style.backgroundColor = "rgb(47, 83, 175)";
+    let symbols = ["/", "<", ">", "@", "#", "$", "%", "&", "*", "+", "?"];
 
     /*** THIS IS THE CALLBACK FOR KEY DOWN (* DO NOT CHANGE THE NAME *..) */
     windowKeyDownRef = function (e) {
       //code for key down in here
       console.log(e);
       console.log("c-down");
+
+      //add a new symbol when we press enter
+      if (e.code === "Enter") {
+        console.log("c-enter down");
+        let newSymbol = document.createElement("span");
+        let randomIndex = Math.floor(Math.random() * symbols.length);
+
+        newSymbol.textContent = symbols[randomIndex];
+        newSymbol.classList.add("TEAM_C_c_symbol");
+        parentCanvas.appendChild(newSymbol);
+
+        // newSymbol.style.color = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(
+        //   Math.random() * 256
+        // )}, ${Math.floor(Math.random() * 256)})`;
+        // newSymbol.style.fontSize = `${Math.floor(Math.random() * 40) + 10}px`;
+
+        // newSymbol.style.left = `${Math.floor(Math.random() * parentCanvas.clientWidth)}px`;
+        // newSymbol.style.top = `${Math.floor(Math.random() * parentCanvas.clientHeight)}px`;
+
+        //end printing symbols after a certain symbols
+        if (parentCanvas.childElementCount > 715) {
+          parentCanvas.removeChild(parentCanvas.firstChild);
+        }
+      }
+      //change bg color on shift key
+      if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
+        console.log("c-shift down");
+        let r = Math.floor(Math.random() * 10);
+        let g = Math.floor(Math.random() * 10);
+        let b = Math.floor(Math.random() * 256);
+        parentCanvas.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+      }
+
+      //clear all symbols on backspace
+      if (e.code === "Backspace") {
+        console.log("c-backspace down");
+        parentCanvas.innerHTML = "";
+      }
+
+      if (e.code === "ArrowUp") {
+        console.log("c-up arrow");
+        parentCanvas.style.transform = "rotate(90deg)";
+      }
+      if (e.code === "ArrowDown") {
+        console.log("c-down arrow");
+        parentCanvas.style.transform = "rotate(270deg)";
+      }
+      if (e.code === "ArrowLeft") {
+        console.log("c-left arrow");
+        parentCanvas.style.transform = "rotate(180deg)";
+      }
+      if (e.code === "ArrowRight") {
+        console.log("c-right arrow");
+        parentCanvas.style.transform = "rotate(0deg)";
+      }
     };
 
     /*** THIS IS THE CALLBACK FOR KEY UP (*DO NOT CHANGE THE NAME..) */
     windowKeyUpRef = function (e) {
       console.log(e);
       console.log("c-up");
+
+      //example for enter key up
+      if (e.code === "Enter") {
+        console.log("c-enter up");
+
+        // parentCanvas.style.backgroundColor = "rgb(47, 83, 175)";
+        parentCanvas.style.transition = "background 3s";
+        let r = Math.floor(Math.random() * 10);
+        let g = Math.floor(Math.random() * 10);
+        let b = Math.floor(Math.random() * 256);
+        parentCanvas.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+
+
+      }
     };
     //DO NOT REMOVE
     window.addEventListener("keydown", windowKeyDownRef);
     window.addEventListener("keyup", windowKeyUpRef);
   }
 
-   /****************ANI D************************************ */
+  /****************ANI D************************************ */
   /** PUT ALL YOUR CODE FOR INTERACTIVE PATTERN D INSIDE HERE */
   /****************ANI D************************************ */
   /**************** TASK *******************************************
@@ -104,8 +179,7 @@ function setup_C() {
    * remember you can define other functions inside....
    * Do not change any code above or the HTML markup.
    * **/
-   function aniD(parentCanvas) {
+  function aniD(parentCanvas) {
     console.log("in ani-D -teamC");
-    }
+  }
 }
-   
