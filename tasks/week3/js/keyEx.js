@@ -1,6 +1,18 @@
 let speedX = 5;
 
 window.onload = function () {
+
+    window.setTimeout(addTimeoutText, 5000);
+    function addTimeoutText() {
+        let parent = document.getElementById("boxB");
+        parent.innerHTML += " NEW TEXT TO APPEAR ";
+    }
+    window.setInterval(addTextRecur, 2000);
+    function addTextRecur() {
+        let parent = document.getElementById("boxB");
+        parent.innerHTML += " NEW TEXT TO APPEAR RECUR ";
+    }
+
     console.log("keys");
     let speedX = 5;
     window.addEventListener("keydown", function (event) {
