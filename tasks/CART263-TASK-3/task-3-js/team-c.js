@@ -23,11 +23,48 @@ function setup_C() {
    * **/
 
   function aniA(parentCanvas) {
-    console.log("in ani-A -teamC");
+    let randomColors = [
+      "azure",
+      "cornflowerblue",
+      "darkblue",
+      "lightblue",
+      "lightsteelblue",
+    ]
+    parentCanvas.style.backgroundColor = "rgb(199, 219, 255)";
 
+    //get the rendered bounding Box of parent and use the width and height
+    let boundingBoxParent = parentCanvas.getBoundingClientRect();
+    let arrayOfellipses = [];
 
+    //make a grid of cells
+    for (let i = 38; i < boundingBoxParent.width; i += 50) {
+      for (let j = 38; j < boundingBoxParent.height; j += 50) {
+        //create a div and place in the grid
+        let ellipse = document.createElement("div");
+        ellipse.classList.add("TEAM_H_h_cell_D");
+        parentCanvas.appendChild(ellipse);
+        ellipse.style.left = `${j}px`;
+        ellipse.style.top = `${i}px`;
+        ellipse.style.width = "20px";
+        ellipse.style.height = "20px";
+        ellipse.style.opacity = 1;
+        ellipse.style.background = "blue";
+      }
+    }
+
+    let clickThree = document.querySelector("#TEAM_C");
+    clickThree.addEventListener("click", function (e) {
+      //parentCanvas.style.backgroundColor = "red";
+      //ellipse.style.background = "red";
+    });
+
+    let allSections = document.querySelectorAll(".TEAM_H_h_cell_D");
+    //go through each section and apply the event listener
+    for (let element of allSections) {
+      element.style.background =
+        randomColors[parseInt(Math.random() * randomColors.length)]
+    }
   }
-
 
 
 
@@ -50,6 +87,55 @@ function setup_C() {
   function aniB(parentCanvas) {
     console.log("in ani-B -teamC");
 
+    let canvasB = document.getElementById("ani_canvC_B");
+    // adding a color background
+    canvasB.style.background = "#566b99";
+
+    // array of symbols for the pattern
+    let symbols = ["*", "^", ":", "°", "¤", "~", "_", "=", "‡", "¥", "•", "¿"]
+
+    symbolPattern();
+
+    function symbolPattern() {
+      //offset 
+      let offset = 50;
+      //make a grid of symbol 
+      for (let i = 0; i < 12; i++) {
+        for (let j = 0; j < 12; j++) {
+          // making the symbol random
+          let random = Math.floor(Math.random() * symbols.length);
+          // console.log(random);
+          let newSymbol = symbols[random];
+          // console.log(newSymbol);
+
+          //create symbol using p
+          let symbolP = document.createElement("p");
+          let symbolText = document.createTextNode(newSymbol);
+          //class css (I ADDED A CSS CLASS :D !)
+          symbolP.classList.add("TEAM_C_b_cell");
+          symbolP.style.marginTop = "-40px";
+          symbolP.style.marginLeft = "-43px";
+          symbolP.style.height = "30px";
+          symbolP.style.width = "30px";
+          symbolP.style.borderStyle = "none";
+          symbolP.style.left = offset + i * 30 + "px";
+          symbolP.style.top = offset + j * 30 + "px";
+          symbolP.style.background = "#9ac1de";
+
+          parentCanvas.appendChild(symbolP);
+          symbolP.appendChild(symbolText);
+
+          //add event listener to each p (realised it was supposed to be a div, I hope it's fine I did it with a "p")
+          let hoverSymbol = symbols[j];
+          symbolP.addEventListener("mousemove", function (e) {
+            this.style.background = "#566b99";
+            this.style.color = "#9ac1de";
+            this.textContent = hoverSymbol;
+
+          })
+        }
+      }
+    }
   }
   /****************ANI C ************************************ */
   /** PUT ALL YOUR CODE FOR INTERACTIVE PATTERN C INSIDE HERE */

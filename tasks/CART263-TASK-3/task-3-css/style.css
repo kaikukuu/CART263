@@ -183,3 +183,17 @@ h5 {
   border-radius: 50%;
   overflow: hidden;
 }
+
+/*CSS TEAM C**/
+.TEAM_C_b_cell {
+  background: #00000000;
+  color: rgb(255, 255, 255);
+  width: 375px;
+  height: 375px;
+  left: 0px;
+  top: 0px;
+  margin-top: 0px;
+  margin-left: 0px;
+  position: relative;
+
+}
