@@ -1,0 +1,40 @@
+<html>
+
+<head>
+  <title>LocalStorage Tests </title>
+  <link rel="stylesheet" type="text/css" href="css/styles.css" />
+  <script type="text/javascript" src="js/localStorageTests.js"></script>
+</head>
+
+
+<body>
+  <!-- for input-->
+  <div class="back">
+    <div class="wrapper">
+      <div id="a" class="theButtons">
+        <span class="titleBar not-active">CLICK A</span>
+        <input type=text id="inputField_a" />
+      </div>
+      <div id="b" class="theButtons">
+        <span class="titleBar not-active">CLICK B</span>
+        <input type=text id="inputField_b" />
+      </div>
+      <div id="c" class="theButtons">
+        <span class="titleBar not-active">CLICK C</span>
+        <input type=text id="inputField_c" />
+      </div>
+    </div>
+  </div>
+
+
+  <!-- for retrieval-->
+  <div class="back">
+    <input type="button" value=" refresh the output" id="refresh" />
+    <div class="wrapper">
+      <div id="a_res" data-ref = "a" class="theRes"></div>
+      <div id="b_res" data-ref = "b" class="theRes"></div>
+      <div id="c_res" data-ref = "c" class="theRes"></div>
+    </div>
+</body>
+
+</html>

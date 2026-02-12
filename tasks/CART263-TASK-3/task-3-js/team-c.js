@@ -103,7 +103,7 @@ function setup_C() {
         // newSymbol.style.top = `${Math.floor(Math.random() * parentCanvas.clientHeight)}px`;
 
         //end printing symbols after a certain symbols
-        if (parentCanvas.childElementCount > 715) {
+        if (parentCanvas.childElementCount > 485) {
           parentCanvas.removeChild(parentCanvas.firstChild);
         }
       }
