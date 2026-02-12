@@ -181,5 +181,102 @@ function setup_C() {
    * **/
   function aniD(parentCanvas) {
     console.log("in ani-D -teamC");
+
+    parentCanvas.style.position = "relative";
+    parentCanvas.style.overflow = "hidden";
+    let boundingBoxParent = parentCanvas.getBoundingClientRect();
+    let arrayOfStars = [];
+
+    //Set the background color of canvas
+    parentCanvas.style.background = "black";
+    parentCanvas.style.position = "relative";
+    //create and place 50 stars randomly on the canvas and give them random velocities
+    for (let i = 0; i < 50; i++) {
+      let star = document.createElement("div");
+      star.classList.add("TEAM_C_d_star");
+      //get the rendered bounding Box of parent and use the width and height to position the stars randomly within the parent
+      star.style.left = `${Math.random() * boundingBoxParent.width}px`;
+      star.style.top = `${Math.random() * boundingBoxParent.height}px`;
+
+      parentCanvas.appendChild(star);
+
+      //create an object to hold the opacity of the star and its velocity and push it to the array of stars
+      arrayOfStars.push({
+        element: star,
+        vx: Math.random() * 2 - 1,
+        vy: Math.random() * 2 - 1,
+        opacity: Math.random()
+      });
+
+    }
+
+    //animate the stars by updating their position based on their velocity in a callback function for requestAnimationFrame
+    function animate() {
+      for (let i = 0; i < arrayOfStars.length; i++) {
+        let p = arrayOfStars[i];
+
+        let currentX = parseFloat(p.element.style.left);
+        let currentY = parseFloat(p.element.style.top);
+
+        p.element.style.left = currentX + p.vx + "px";
+        p.element.style.top = currentY + p.vy + "px";
+      }
+
+      window.requestAnimationFrame(animate);
+    }
+
+    window.requestAnimationFrame(animate);
   }
+
+  //   let boundingBoxParent = parentCanvas.getBoundingClientRect();
+  //   let arrayOfStars = [];
+
+  //   //set background color  of canvas
+  //   parentCanvas.style.background = "black";
+
+  //   //create 50 stars
+  //   for (let i = 0; i < 50; i++) {
+  //     let star = document.createElement("div");
+  //     star.classList.add("TEAM_C_d_star");
+  //     star.style.left = `${Math.random() * boundingBoxParent.width}px`;
+  //     star.style.top = `${Math.random() * boundingBoxParent.height}px`;
+  //     parentCanvas.appendChild(star);
+
+  //     //create an object to hold the opacity of the star and its velocity
+  //     let p = {
+  //       element: star,
+  //       vx: Math.random() * 2 - 1, //velocity x
+  //       vy: Math.random() * 2 - 1, //velocity y
+  //       starOpacity: Math.random(),
+
+  //     };
+  //     arrayOfStars.push(p);
+  //   }
+
+  //   //return the array of stars
+  //   return arrayOfStars;
+
+
+  // }
+  // parentCanvas.requestAnimationFrame(animate);
+
+  // /****** callback for requestAnimationFrame **********/
+  // function animate() {
+
+  //   //
+  //   let pArray = aniD(document.getElementById("ani_canvC"));
+  //   for (let i = 0; i < pArray.length; i++) {
+  //     let p = pArray[i];
+  //     //update position
+  //     let currentX = parseFloat(p.element.style.left);
+  //     let currentY = parseFloat(p.element.style.top);
+  //     p.element.style.left = currentX + p.vx + "px";
+  //     p.element.style.top = currentY + p.vy + "px";
+  //   }
+
+  //   window.requestAnimationFrame(animate);
+  //   checkBounds(document.getElementById("parent"), p);
+  // }
+  // //recall animation loop
+  // requestAnimationFrame(animate);
 }
