@@ -30,21 +30,10 @@ window.onload = function () {
             skyDiv: document.createElement("div"),
         },
 
-        /*sun object */
-        sun: {
-            sunColor: {
-                r: 240,
-                g: 206,
-                b: 83,
-            },
-            //the sun element
-            sunDiv: document.createElement("div"),
-        },
-
 
     };
     function createAndRenderTheGarden() {
-        /* note how we use dot notation....*/
+
         //sky
         garden.sky.skyDiv.classList.add("sky");
         garden.sky.skyDiv.style.background = `rgb(
@@ -55,14 +44,8 @@ window.onload = function () {
         document.getElementsByTagName("main")[0].appendChild(garden.sky.skyDiv);
 
         //sun - IN the sky
-        garden.sun.sunDiv.classList.add("sun");
-        garden.sun.sunDiv.style.background = `rgb(
-        ${garden.sun.sunColor.r},
-        ${garden.sun.sunColor.g},
-        ${garden.sun.sunColor.b}
-        )`;
-        //append to the SKY div
-        document.getElementsByClassName("sky")[0].appendChild(garden.sun.sunDiv);
+        let sun = new Sun(10, 10, { r: 240, g: 206, b: 83 });
+        sun.renderSun();
 
         //grass
         garden.grass.grassDiv.classList.add("grass");
@@ -75,11 +58,21 @@ window.onload = function () {
 
         //flowers
         for (let i = 0; i < garden.numFlowers; i++) {
-            //create a flower and add it to the garden
-            let flower = new Flower();
+            // Create variables for our arguments for clarity
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * 120;
+            let size = Math.random() * 30 + 50;
+            let stemLength = Math.random() * 50 + 50;
+            let petalColor = {
+                r: parseInt(Math.random() * 155) + 100,
+                g: parseInt(Math.random() * 155) + 100,
+                b: parseInt(Math.random() * 155) + 100,
+            };
+
+            // Create a new flower using the arguments
+            let flower = new Flower(x, y, size, stemLength, petalColor);
+            // Add the flower to the array of flowers
             garden.flowers.push(flower);
-            //render the flower
-            flower.renderFlower();
         }
 
         for (let i = 0; i < garden.flowers.length; i++) {
@@ -87,11 +80,12 @@ window.onload = function () {
         }
 
 
-    }
-
-    /* render the sun, sky and grass*/
+    };
+   
+    /* render the swssdsasun, sky and grass*/
     createAndRenderTheGarden();
 
-}
 
+
+}
 
