@@ -140,3 +140,33 @@ div:hover {
     position: absolute;
 
 }
+
+#media-viewer-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, .75);
+    padding: 20px;
+    width: 300px;
+    height: 200px;
+    display: none;
+    z-index: 3;
+}
+
+#non-interactive-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, .75);
+    padding: 20px;
+    width: 300px;
+    height: 200px;
+    display: none;
+    z-index: 3;
+}
+
+#id {
+    
+}

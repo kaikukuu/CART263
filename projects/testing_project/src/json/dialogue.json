@@ -1,0 +1,19 @@
+{
+    "dialogue-text": [
+        {
+            "name": "character1",
+            "t1": "are you there?",
+            "t2": "I have something to tell you."
+        },
+        {
+            "name": "character2",
+            "t1": "I'm here!",
+            "t2": "What is it?"
+        },
+        {
+            "name": "",
+            "t1": "",
+            "t2": "I have something to tell you too."
+        }
+    ]
+}
