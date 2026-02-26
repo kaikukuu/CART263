@@ -2,8 +2,10 @@
     "dialogue-text": [
         {
             "name": "character1",
+            "text": "are you there? look up. I have something to tell you.",
             "t1": "are you there?",
-            "t2": "I have something to tell you."
+            "t2": "look up.",
+            "t3": "I have something to tell you."
         },
         {
             "name": "character2",

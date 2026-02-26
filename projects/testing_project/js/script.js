@@ -14,28 +14,43 @@ window.onload = function () {
     }
     img.src = "src/IMG_2103.jpg";
 
-    //add an event listener to the button
-    let button = document.getElementById("Button");
-    button.addEventListener("click", function () {
-        console.log("button clicked!");
-        context.fillStyle = "rgba(0,255,0,255)";
-        context.fillRect(canvas.width / 2, canvas.height / 2, 50, 50);
-    });
+    let dialogueData = null;
 
     //Converting a JSON Text to a js Object
     //from https://www.geeksforgeeks.org/javascript/read-json-file-using-javascript/
     function fetchJSONData() {
-        fetch('./src/json/dialogue.json')
+        fetch('/projects/testing_project/dialogue.json')
             .then(response => {
+                console.log("Response status:", response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 return response.json();
             })
-            .then(data => console.log(data))
-            .catch(error => console.error('Failed to fetch data:', error));
+            .then(data => {
+                dialogueData = data;
+                console.log("Dialogue data loaded:", data);
+            })
+            .catch(error => {
+                console.error('Failed to fetch data:', error);
+            });
     }
     fetchJSONData();
 
+    //add an event listener to the button
+    let button = document.getElementById("Button");
+    button.addEventListener("click", function () {
+        console.log("button clicked!");
+        if (dialogueData && dialogueData["dialogue-text"] && dialogueData["dialogue-text"][0]) {
+            // Display dialogue text on canvas
+            context.fillStyle = "rgba(0, 0, 0, 0.7)";
+            context.fillRect(50, 400, 400, 80);
+            context.fillStyle = "white";
+            context.font = "16px Roboto";
+            context.fillText(dialogueData["dialogue-text"][0].name + ": " + dialogueData["dialogue-text"][0].t1, 60, 430);
+        } else {
+            console.log("Dialogue data not loaded yet!");
+        }
+    });
 }
 
