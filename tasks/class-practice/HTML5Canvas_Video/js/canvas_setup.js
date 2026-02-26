@@ -34,4 +34,25 @@ window.onload = function () {
     context.stroke();//set the stroke
     context.closePath();
 
+    // AN IRREGULAR SHAPE
+    let lineLength = 100;
+    let x1 = canvas.width / 2;
+    let y1 = canvas.height / 2;
+    let x2 = x1 + lineLength;
+    let y2 = y1 - lineLength;
+    let x3 = x1 - lineLength;
+
+    context.beginPath(); //start a path
+    context.moveTo(x1, y1); //where to start drawing
+    context.lineTo(x2, y1); //lineTo(where to go from last...)
+    context.lineTo(x2, y2); //lineTo(where to go from last...)
+    context.lineTo(x3, y2); //lineTo(where to go from last...)
+    context.lineTo(x1, y1); //lineTo(where to go from last...)
+    context.strokeStyle = "#FFFFFF"; // change the color we are using
+    context.fillStyle = "#bb25d5ff"
+    context.lineWidth = 2;
+    context.stroke();
+    context.fill();
+    context.closePath(); //end a path ...
+
 };
