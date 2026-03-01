@@ -34,86 +34,6 @@ div:hover {
     cursor: pointer;
 }
 
-/* .intro-section {
-    background-color: rgba(214, 110, 239, 1.0);
-    padding: 10px;
-    width: calc(98% - 20px);
-    margin: 0 auto;
-    margin-top: 10px;
-}
-
-.intro-section h2 {
-    text-align: center;
-}
-
-.intro-section-p-active {
-    background: rgba(214, 110, 239, .75);
-}
-
-.intro-section-active {
-    background: rgba(214, 110, 239, .5);
-}
-
-.s1-section {
-    background-color: rgba(239, 166, 110, 1.0);
-    padding: 10px;
-    width: calc(98% - 20px);
-    margin: 0 auto;
-    margin-top: 10px;
-}
-
-.s1-section-active {
-    background: rgba(239, 166, 110, .5);
-}
-
-.s1-section-p-active {
-    background: rgba(239, 166, 110, .75);
-}
-
-.s1-section h2 {
-    text-align: center;
-}
-
-.s2-section {
-    background-color: rgba(110, 170, 239, 1.0);
-    padding: 10px;
-    width: calc(98% - 20px);
-    margin: 0 auto;
-    margin-top: 10px;
-}
-
-.s2-section-active {
-    background-color: rgba(110, 170, 239, .5);
-}
-
-.s2-section-p-active {
-    background-color: rgba(110, 170, 239, .75);
-}
-
-.s2-section h2 {
-    text-align: center;
-}
-
-.s3-section {
-    background-color: rgba(239, 110, 129, 1.0);
-    padding: 10px;
-    width: calc(98% - 20px);
-    margin: 0 auto;
-    margin-top: 10px;
-}
-
-.s3-section-active {
-    background-color: rgba(239, 110, 129, .5);
-}
-
-.s3-section-p-active {
-    background-color: rgba(239, 110, 129, .75);
-}
-
-.s3-section h2 {
-    text-align: center;
-} */
-
 /*** BUTTON ****/
 #Button {
     padding: 5px;
@@ -154,7 +74,10 @@ div:hover {
     z-index: 3;
 }
 
-#non-interactive-text {
+#id {}
+
+/* style for main dialogue text */
+#dialogueText p {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -165,8 +88,4 @@ div:hover {
     height: 200px;
     display: none;
     z-index: 3;
-}
-
-#id {
-    
 }
