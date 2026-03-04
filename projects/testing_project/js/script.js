@@ -7,6 +7,17 @@ window.onload = function () {
 
     //reference for using the canvas API: https://www.w3schools.com/jsref/api_canvas.asp
 
+    function resizeCanvas() {
+        const ratio = 500 / 500;          // or compute from your design
+        const w = window.innerWidth * 0.8; // example: 80% of window
+        canvas.width = w;
+        canvas.height = w / ratio;
+        // redraw your scene here
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
     context.fillStyle = "rgba(255,0,0,255)";
 
     let background_imgs = ["src/IMG_2102.jpg", "src/IMG_2103.jpg", "src/IMG_2113.jpg", "src/IMG_2114.jpg", "src/IMG_2125.jpg", "src/IMG_2126.jpg", "src/IMG_2150.jpg"];

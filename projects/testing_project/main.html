@@ -16,9 +16,8 @@
         /* CAN ADD CSS  - > just like any other HTML element */
         canvas {
             background: black;
-            position: absolute;
-            top: 0%;
-            left: 0%;
+            display: block;
+            margin: 0 auto;
         }
     </style>
     <script src="js/script.js"></script>
@@ -29,7 +28,7 @@
     <canvas id="testCanvas" width=500 height=500></canvas>
 
 
-    <div id="parent">
+    <!-- <div id="parent">
         <div id="Button">Click Me!</div>
         <!-- <div>
             <h1>My First Heading</h1>
@@ -40,15 +39,30 @@
         <div class="child">Child 1</div>
         <div class="child">Child 2</div>
         <div class="child">Child 3</div> -->
-    </div>
+    </div> -->
 
     <div id="non-interactive-text">
 
-        <p>Media Viewer Box</p>
+        <p>Item Viewer Box</p>
         <p>Click the button to open the media viewer box.</p>
 
     </div>
 
+    <div id="dialogue-box">
+        <div id="character-list">
+            <p>Title (Speaking characters)</p>
+            <p>Character 1</p>
+            <p>Character 2</p>
+        </div>
+        <div id="dialogue-text">
+            <p>Dialogue Text</p>
+            <div id="dialogue-options">
+                <p>Option 1</p>
+                <p>Option 2</p>
+                <p>Option 3</p>
+            </div>
+
+        </div>
 
 </body>
 

@@ -12,11 +12,11 @@ body {
 
 }
 
-#top-layer {
-    top: 0;
-    left: 1vw;
-    position: absolute;
-    z-index: 2;
+canvas {
+    display: block;
+    /* removes the inline‑element gutter */
+    margin: 0 auto;
+    /* horizontal centre */
 }
 
 #parent {
