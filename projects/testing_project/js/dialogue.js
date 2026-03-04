@@ -1,5 +1,7 @@
 // Dialogue module - functions to be called from main script.js
 let dialogueData = null;
+let currentDialogueIndex = 0;
+let currentPartIndex = 0;
 
 // Fetch dialogue data from JSON
 function fetchDialogueData() {
@@ -20,8 +22,48 @@ function fetchDialogueData() {
         });
 }
 
+// Get current dialogue text
+function getCurrentDialogueText() {
+    if (!dialogueData || !dialogueData["dialogue-text"]) return "Loading dialogue...";
+
+    const currentDialogue = dialogueData["dialogue-text"][currentDialogueIndex];
+    if (!currentDialogue) return "End of dialogue.";
+
+    const partKey = `t${currentPartIndex + 1}`;
+    const text = currentDialogue[partKey];
+    if (!text) return "End of dialogue.";
+
+    return `${currentDialogue.name}: ${text}`;
+}
+
+// Advance to next dialogue part
+function advanceDialogue() {
+    if (!dialogueData || !dialogueData["dialogue-text"]) return;
+
+    const currentDialogue = dialogueData["dialogue-text"][currentDialogueIndex];
+    if (!currentDialogue) return;
+
+    currentPartIndex++;
+    const nextPartKey = `t${currentPartIndex + 1}`;
+    if (!currentDialogue[nextPartKey]) {
+        // No more parts, go to next dialogue
+        currentDialogueIndex++;
+        currentPartIndex = 0;
+        if (currentDialogueIndex >= dialogueData["dialogue-text"].length) {
+            currentDialogueIndex = 0; // Loop back or handle end
+        }
+    }
+
+    // Trigger background change at specific dialogue points
+    if (typeof window.onDialogueAdvance === 'function') {
+        window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
+    }
+}
+
 // Draw a dialogue box on the canvas
-function drawDialogueBox(canvas, context, text, boxHeight = 150) {
+function drawDialogueBox(canvas, context, boxHeight = 150) {
+    const text = getCurrentDialogueText();
+
     // Position in bottom third of canvas
     const boxWidth = canvas.width * 0.9;  // 90% of canvas width
     const boxX = (canvas.width - boxWidth) / 2;
@@ -52,7 +94,8 @@ function drawDialogueBox(canvas, context, text, boxHeight = 150) {
 function setupDialogueInput() {
     document.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
-            console.log("Enter key pressed! Current dialogue data:", dialogueData);
+            advanceDialogue();
+            console.log("Enter key pressed! Current dialogue:", getCurrentDialogueText());
         }
     });
 }

@@ -42,6 +42,17 @@ window.onload = function () {
 
     let currentBackgroundIndex = 0;
     let currentBackgroundImg = null;
+    let showMediaBox = false;
+    let mediaBoxImage = null;
+
+    // Callback for dialogue advances to trigger background changes
+    window.onDialogueAdvance = function (dialogueIndex, partIndex) {
+        // Example: change background after first dialogue (index 1, part 0)
+        if (dialogueIndex === 1 && partIndex === 0) {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % background_imgs.length;
+            changeBackground();
+        }
+    };
 
     //function to change the background image based on the current index
     function changeBackground() {
@@ -75,6 +86,10 @@ window.onload = function () {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % background_imgs.length;
             changeBackground();
         }
+        if (event.key === "Escape") {
+            showMediaBox = false;
+            mediaBoxImage = null;
+        }
     });
 
 
@@ -103,6 +118,18 @@ window.onload = function () {
             context.drawImage(currentBackgroundImg, 0, 0, canvas.width, canvas.height);
         }
 
+        // Draw clickable area indicator (semi-transparent rectangle)
+        context.fillStyle = "rgba(255, 255, 255, 0.3)";
+        context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
+        context.strokeStyle = "rgba(255, 255, 255, 0.8)";
+        context.lineWidth = 2;
+        context.strokeRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
+
+        // Draw text on clickable area
+        context.fillStyle = "white";
+        context.font = "14px Roboto";
+        context.fillText("Click me!", canvas.width / 2 - 30, canvas.height / 2 + 5);
+
         // Fade in the foreground image
         if (fadingIn) {
             alpha += 0.01;
@@ -117,16 +144,12 @@ window.onload = function () {
         }
 
         // Draw dialogue box every frame
-        drawDialogueBox(canvas, context, "This is a dialogue box. It can display text for the player to read.");
+        drawDialogueBox(canvas, context);
 
-        requestAnimationFrame(fadeEffect);
-    }
-    fadeEffect();
-
-    function drawMediaBox(imageSrc, boxWidth = 300, boxHeight = 200) {
-        const img = new Image();
-        img.onload = function () {
-            // Calculate center position
+        // Draw media box if active
+        if (showMediaBox && mediaBoxImage) {
+            const boxWidth = 300;
+            const boxHeight = 200;
             const boxX = (canvas.width - boxWidth) / 2;
             const boxY = (canvas.height - boxHeight) / 2;
 
@@ -143,8 +166,8 @@ window.onload = function () {
             const padding = 20;
             const maxImgWidth = boxWidth - (padding * 2);
             const maxImgHeight = boxHeight - (padding * 2);
-            let imgWidth = img.width;
-            let imgHeight = img.height;
+            let imgWidth = mediaBoxImage.width;
+            let imgHeight = mediaBoxImage.height;
 
             // Scale image to fit, maintaining aspect ratio
             const ratio = Math.min(maxImgWidth / imgWidth, maxImgHeight / imgHeight);
@@ -156,14 +179,36 @@ window.onload = function () {
             const imgY = boxY + (boxHeight - imgHeight) / 2;
 
             // Draw the image
-            context.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+            context.drawImage(mediaBoxImage, imgX, imgY, imgWidth, imgHeight);
+        }
+
+        requestAnimationFrame(fadeEffect);
+    }
+    fadeEffect();
+
+    function drawMediaBox(imageSrc, boxWidth = 300, boxHeight = 200) {
+        showMediaBox = true;
+        const img = new Image();
+        img.onload = function () {
+            mediaBoxImage = img;
         };
         img.src = imageSrc;
     }
 
-    // Call it in response to a trigger
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "m") {  // press 'm' to show media box
+    // Canvas click listener for interactive elements
+    canvas.addEventListener('click', function (event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Define clickable area (e.g., center of canvas, 100x100 pixels)
+        const clickableX = canvas.width / 2 - 50;
+        const clickableY = canvas.height / 2 - 50;
+        const clickableWidth = 100;
+        const clickableHeight = 100;
+
+        if (x >= clickableX && x <= clickableX + clickableWidth &&
+            y >= clickableY && y <= clickableY + clickableHeight) {
             drawMediaBox("src/IMG_2102.jpg", 300, 200);
         }
     });
