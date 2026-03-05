@@ -1,5 +1,31 @@
 {
-    "intro": [
+    "location1": [
+        {
+            "name": "??",
+            "t1": "Welcome to the forest clearing.",
+            "t2": "can you find me?",
+            "t3": "Look around and see what you can find."
+        },
+        {
+            "name": "You",
+            "t1": "It;s so quiet here.",
+            "t2": "This looks interesting."
+        }
+    ],
+    "location2": [
+        {
+            "name": "??",
+            "t1": "You've entered the frozen forest.",
+            "t2": "The air feels different here.",
+            "t3": "Be careful what you touch."
+        },
+        {
+            "name": "You",
+            "t1": "There's something eerie about this place. There's buildings here but no one around.",
+            "t2": "I wonder what happened here."
+        }
+    ],
+    "location3": [
         {
             "name": "??",
             "t1": "Did you see that?",
@@ -11,10 +37,36 @@
         {
             "name": "You",
             "t1": "I'm here!",
-            "t2": "What is it?"
+            "t2": "What is it?",
+            "t3": "I feel so small up here."
         }
     ],
-    "afterTrigger": [
+    "location1_afterTrigger": [
+        {
+            "name": "Item",
+            "t1": "You found a mysterious glowing orb!",
+            "t2": "It hums with ancient power."
+        },
+        {
+            "name": "??",
+            "t1": "This orb will lead you to me.",
+            "t2": "Come find me before it's too late.",
+            "t3":"My life fire is fading, I need your help to find me before I disappear forever."
+        }
+    ],
+    "location2_afterTrigger": [
+        {
+            "name": "Item",
+            "t1": "You discovered a bottle cap!",
+            "t2": "What wisdom does it hold?"
+        },
+        {
+            "name": "??",
+            "t1": "This contains knowledge from the past.",
+            "t2": "Study it carefully."
+        }
+    ],
+    "location3_afterTrigger": [
         {
             "name": "Item",
             "t1": "You picked up the item!",

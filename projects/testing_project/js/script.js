@@ -37,13 +37,54 @@ window.onload = function () {
 
     let background_imgs = ["src/IMG_2102.jpg", "src/IMG_2103.jpg", "src/IMG_2113.jpg", "src/IMG_2114.jpg", "src/IMG_2125.jpg", "src/IMG_2126.jpg", "src/IMG_2150.jpg", "src/IMG_2124.jpg", "src/IMG1.png", "src/IMG2.png", "src/IMG3.png", "src/IMG4.png", "src/IMG5.png"];
 
+    // Define locations with their backgrounds, items, and dialogue triggers
+    let locations = [
+        {
+            background: "src/IMG_2102.jpg",
+            items: [
+                { x: 150, y: 200, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2102.jpg', collected: false },
+                { x: 300, y: 150, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2103.jpg', collected: false }
+            ],
+            dialogueTrigger: "location1"
+        },
+        {
+            background: "src/IMG_2103.jpg",
+            items: [
+                { x: 200, y: 250, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2113.jpg', collected: false },
+                { x: 350, y: 100, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2114.jpg', collected: false }
+            ],
+            dialogueTrigger: "location2"
+        },
+        {
+            background: "src/IMG_2113.jpg",
+            items: [
+                { x: 100, y: 300, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2125.jpg', collected: false }
+            ],
+            dialogueTrigger: "location3"
+        }
+        // Add more locations as needed
+    ];
+
+    // Load item images for all locations
+    locations.forEach(location => {
+        location.items.forEach((item, index) => {
+            // Assign small images based on index 
+            const smallImgs = ['src/IMG1.png', 'src/IMG2.png', 'src/IMG3.png', 'src/IMG4.png', 'src/IMG5.png'];
+            item.smallImg.src = smallImgs[index % smallImgs.length];
+        });
+    });
+
     //add an image to the canvas in front of the backgrounds
     let foreground_imgs = ["src/IMG_2102.jpg"];
 
     let currentBackgroundIndex = 0;
     let currentBackgroundImg = null;
+    let currentLocation = locations[0]; // Start with first location
+    let items = currentLocation.items; // Reference to current location's items
     let showMediaBox = false;
     let mediaBoxImage = null;
+    let mediaBoxWidth = 300;
+    let mediaBoxHeight = 200;
     let gameState = 'start'; // 'start', 'video', 'dialogue'
     let video;
     let backgroundVisible = false;
@@ -67,6 +108,20 @@ window.onload = function () {
 
     //function to change the background image based on the current index
     function changeBackground() {
+        // Update current location based on background
+        const currentBg = background_imgs[currentBackgroundIndex];
+        const newLocation = locations.find(loc => loc.background === currentBg) || locations[0];
+
+        // If location changed, update items and dialogue
+        if (newLocation !== currentLocation) {
+            currentLocation = newLocation;
+            items = currentLocation.items;
+            // Reset dialogue to location's intro
+            window.setDialogueTrigger(currentLocation.dialogueTrigger);
+            currentDialogueIndex = 0;
+            currentPartIndex = 0;
+        }
+
         //background image setup
         let backgroundImg = new Image();
         backgroundImg.onload = function () {
@@ -120,7 +175,8 @@ window.onload = function () {
         gameState = 'dialogue';
         backgroundVisible = false;
         firstDialogueAdvance = true;
-        // Reset dialogue to intro
+        // Reset dialogue to current location's intro
+        window.setDialogueTrigger(currentLocation.dialogueTrigger);
         currentDialogueIndex = 0;
         currentPartIndex = 0;
     });
@@ -175,13 +231,22 @@ window.onload = function () {
                 context.drawImage(currentBackgroundImg, x, y, scaledWidth, scaledHeight);
             }
 
+            // Draw interactive items if background is visible
+            if (backgroundVisible) {
+                items.forEach(item => {
+                    if (!item.collected && item.smallImg.complete) {
+                        context.drawImage(item.smallImg, item.x, item.y, item.width, item.height);
+                    }
+                });
+            }
+
             // Draw dialogue box every frame
             drawDialogueBox(canvas, context);
 
             // Draw media box if active
             if (showMediaBox && mediaBoxImage) {
-                const boxWidth = 300;
-                const boxHeight = 200;
+                const boxWidth = mediaBoxWidth;
+                const boxHeight = mediaBoxHeight;
                 const boxX = (canvas.width - boxWidth) / 2;
                 const boxY = (canvas.height - boxHeight) / 2;
 
@@ -221,6 +286,8 @@ window.onload = function () {
 
     function drawMediaBox(imageSrc, boxWidth = 300, boxHeight = 200) {
         showMediaBox = true;
+        mediaBoxWidth = boxWidth;
+        mediaBoxHeight = boxHeight;
         const img = new Image();
         img.onload = function () {
             mediaBoxImage = img;
@@ -256,6 +323,18 @@ window.onload = function () {
                 drawMediaBox("src/IMG_2102.jpg", 300, 200);
                 // Set trigger for conditional dialogue
                 window.setDialogueTrigger("afterTrigger");
+            }
+        } else if (gameState === 'dialogue' && backgroundVisible) {
+            // Check for item clicks
+            for (let item of items) {
+                if (!item.collected && x >= item.x && x <= item.x + item.width &&
+                    y >= item.y && y <= item.y + item.height) {
+                    drawMediaBox(item.zoomedImg, 400, 300); // Larger box for zoomed view
+                    item.collected = true;
+                    // Set trigger for location-specific dialogue after item collection
+                    window.setDialogueTrigger(currentLocation.dialogueTrigger + "_afterTrigger");
+                    break;
+                }
             }
         }
     });
