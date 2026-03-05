@@ -1,6 +1,55 @@
 {
-    "location1": [
+    "intro": [
         {
+            "background": "src/IMG_2113.jpg",
+            "foreground": "src/shooting star.png",
+            "name": "??",
+            "t1": "come find me.",
+            "t2": "Welcome to my world.",
+            "t3": "I have been waiting for you."
+        },
+        {
+            "background": "src/IMG_2113.jpg",
+            "name": "You",
+            "t1": "Where am I?",
+            "t2": "Who are you?"
+        },
+        {
+            "background": "src/IMG_2114.jpg",
+            "name": "??",
+            "t1": "Up here.",
+            "t2": "Look up.",
+            "t3": "I need your help to find me before I disappear forever."
+        },
+        {
+            "background": "src/IMG4.png",
+            "name": "You",
+            "t1": "What's happening?",
+            "t2": "Hold on!"
+        },
+        {
+            "background": "src/IMG5.png",
+            "name": "You",
+            "t1": "I can't see anything!",
+            "t2": "Wait!"
+        }
+    ],
+    "video": [
+        {
+            "background": "src/IMG_2115.jpg",
+            "name": "??",
+            "t1": "Watch this video.",
+            "t2": "It will show you the way."
+        },
+        {
+            "name": "You",
+            "t1": "What is this video about?",
+            "t2": "I hope it gives me some clues."
+        }
+    ],
+    "clearing": [
+        {
+            "background": "src/IMG_2113.jpg",
             "name": "??",
             "t1": "Welcome to the forest clearing.",
             "t2": "can you find me?",
@@ -12,21 +61,24 @@
             "t2": "This looks interesting."
         }
     ],
-    "location2": [
+    "forest": [
         {
+            "background": "src/IMG_2114.jpg",
             "name": "??",
             "t1": "You've entered the frozen forest.",
             "t2": "The air feels different here.",
             "t3": "Be careful what you touch."
         },
         {
+            "background": "src/IMG_2114.jpg",
             "name": "You",
             "t1": "There's something eerie about this place. There's buildings here but no one around.",
             "t2": "I wonder what happened here."
         }
     ],
-    "location3": [
+    "alley": [
         {
+            "background": "src/IMG_2125.jpg",
             "name": "??",
             "t1": "Did you see that?",
             "t2": "That was me.",
@@ -35,10 +87,24 @@
             "t5": "I have something to tell you."
         },
         {
+            "background": "src/IMG_2125.jpg",
             "name": "You",
             "t1": "I'm here!",
-            "t2": "What is it?",
-            "t3": "I feel so small up here."
+            "t2": "What is it?"
+        },
+        {
+            "background": "src/IMG_2124.jpg",
+            "name": "??",
+            "t1": "I am fading.",
+            "t2": "Would you share your energy with me?",
+            "t3": "Hold me in your hands."
+        },
+        {
+            "background": "src/IMG_2124.jpg",
+            "foreground": "src/imgs/receive.png",
+            "name": "You",
+            "t1": "Of course! I want to help you.",
+            "t2": "How can I share my energy with you?"
         }
     ],
     "location1_afterTrigger": [
@@ -51,7 +117,7 @@
             "name": "??",
             "t1": "This orb will lead you to me.",
             "t2": "Come find me before it's too late.",
-            "t3":"My life fire is fading, I need your help to find me before I disappear forever."
+            "t3": "My life fire is fading, I need your help to find me before I disappear forever."
         }
     ],
     "location2_afterTrigger": [

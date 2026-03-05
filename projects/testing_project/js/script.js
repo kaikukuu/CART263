@@ -35,34 +35,28 @@ window.onload = function () {
     fetchDialogueData();
     setupDialogueInput();
 
-    let background_imgs = ["src/IMG_2102.jpg", "src/IMG_2103.jpg", "src/IMG_2113.jpg", "src/IMG_2114.jpg", "src/IMG_2125.jpg", "src/IMG_2126.jpg", "src/IMG_2150.jpg", "src/IMG_2124.jpg", "src/IMG1.png", "src/IMG2.png", "src/IMG3.png", "src/IMG4.png", "src/IMG5.png"];
-
-    // Define locations with their backgrounds, items, and dialogue triggers
+    // Define locations with items only (backgrounds are now dialogue-driven)
     let locations = [
         {
-            background: "src/IMG_2102.jpg",
             items: [
                 { x: 150, y: 200, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2102.jpg', collected: false },
                 { x: 300, y: 150, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2103.jpg', collected: false }
             ],
-            dialogueTrigger: "location1"
+            dialogueTrigger: "clearing"
         },
         {
-            background: "src/IMG_2103.jpg",
             items: [
                 { x: 200, y: 250, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2113.jpg', collected: false },
                 { x: 350, y: 100, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2114.jpg', collected: false }
             ],
-            dialogueTrigger: "location2"
+            dialogueTrigger: "forest"
         },
         {
-            background: "src/IMG_2113.jpg",
             items: [
                 { x: 100, y: 300, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2125.jpg', collected: false }
             ],
-            dialogueTrigger: "location3"
+            dialogueTrigger: "alley"
         }
-        // Add more locations as needed
     ];
 
     // Load item images for all locations
@@ -75,10 +69,9 @@ window.onload = function () {
     });
 
     //add an image to the canvas in front of the backgrounds
-    let foreground_imgs = ["src/IMG_2102.jpg"];
-
-    let currentBackgroundIndex = 0;
-    let currentBackgroundImg = null;
+    // array holds current foreground source; we'll clear it until dialogue specifies one
+    // size for current foreground image (width, height)
+    let currentForegroundSize = { width: null, height: null };
     let currentLocation = locations[0]; // Start with first location
     let items = currentLocation.items; // Reference to current location's items
     let showMediaBox = false;
@@ -87,7 +80,6 @@ window.onload = function () {
     let mediaBoxHeight = 200;
     let gameState = 'start'; // 'start', 'video', 'dialogue'
     let video;
-    let backgroundVisible = false;
     let firstDialogueAdvance = true;
 
     // Callback for dialogue advances to trigger background changes
@@ -98,73 +90,59 @@ window.onload = function () {
             // Don't advance dialogue on first press, just reveal background
             return;
         }
-        //TODO: add more specific triggers for background changes based on dialogue index and part index
-        // Example: change background after first dialogue (index 1, part 0)
-        if (dialogueIndex === 1 && partIndex === 0) {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % background_imgs.length;
-            changeBackground();
+        //TODO: add more specific triggers for dialogue events based on dialogue index and part index
+        // Backgrounds are now dialogue-driven, specified in dialogue.json
+        // Clear foreground if current dialogue doesn't specify one
+        const currentDialogue = dialogueData && dialogueData[currentTrigger] ? dialogueData[currentTrigger][dialogueIndex] : null;
+        if (currentDialogue && !currentDialogue.foreground) {
+            currentForegroundImg = null;
         }
     };
 
-    //function to change the background image based on the current index
-    function changeBackground() {
-        // Update current location based on background
-        const currentBg = background_imgs[currentBackgroundIndex];
-        const newLocation = locations.find(loc => loc.background === currentBg) || locations[0];
-
-        // If location changed, update items and dialogue
-        if (newLocation !== currentLocation) {
-            currentLocation = newLocation;
-            items = currentLocation.items;
-            // Reset dialogue to location's intro
-            window.setDialogueTrigger(currentLocation.dialogueTrigger);
-            currentDialogueIndex = 0;
-            currentPartIndex = 0;
+    // Callback when dialogue specifies a background/foreground change
+    window.onDialogueBackgroundChange = function (backgroundSrc, foregroundSrc) {
+        if (backgroundSrc) {
+            // Find location by matching dialogue trigger
+            const newLocation = locations.find(loc => loc.dialogueTrigger === currentTrigger) || currentLocation;
+            if (newLocation !== currentLocation) {
+                currentLocation = newLocation;
+                items = currentLocation.items;
+                // Reset collected items when entering new location
+                items.forEach(item => item.collected = false);
+            }
+            // Load background image directly from dialogue
+            loadBackgroundImage(backgroundSrc);
+            backgroundVisible = true; // Make background visible when dialogue specifies it
         }
 
-        //background image setup
-        let backgroundImg = new Image();
-        backgroundImg.onload = function () {
-            currentBackgroundImg = backgroundImg;
-            // Draw image maintaining aspect ratio, cropping to cover canvas
-            const scale = Math.max(canvas.width / backgroundImg.width, canvas.height / backgroundImg.height);
-            const scaledWidth = backgroundImg.width * scale;
-            const scaledHeight = backgroundImg.height * scale;
-            const x = (canvas.width - scaledWidth) / 2;
-            const y = (canvas.height - scaledHeight) / 2;
-            context.drawImage(backgroundImg, x, y, scaledWidth, scaledHeight);
+        if (foregroundSrc) {
+            currentForegroundImg = null; // clear old foreground
+            // optionally dialogue may provide size via additional argument
+            if (arguments.length > 2 && arguments[2]) {
+                currentForegroundSize = Object.assign({}, arguments[2]);
+            } else {
+                currentForegroundSize = { width: null, height: null };
+            }
+            loadForegroundImage(foregroundSrc);
+        } else {
+            // clear if dialogue has no foreground for this entry
+            currentForegroundImg = null;
+            currentForegroundSize = { width: null, height: null };
         }
+    };
 
-        backgroundImg.src = background_imgs[currentBackgroundIndex];
-    }
-
-    function changeForeground() {
-        let foregroundImg = new Image();
-        foregroundImg.onload = function () {
-            context.drawImage(foregroundImg, 0, 0, canvas.width, canvas.height);
-        }
-        foregroundImg.src = foreground_imgs[0];
-    }
-
-
-
-    //initial background and foreground setup
-    changeBackground();
-    changeForeground();
-
-    //user input setup for chnaging the background image
+    // Callback for when intro dialogue completes
+    window.onIntroComplete = function () {
+        gameState = 'video';
+        video.play();
+    };
+    //user input setup
     document.addEventListener("keydown", function (event) {
-        if (event.key === "ArrowRight") {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % background_imgs.length;
-            changeBackground();
-        }
         if (event.key === "Escape") {
             showMediaBox = false;
             mediaBoxImage = null;
         }
     });
-
-
 
     //video setup
     video = document.createElement('video');
@@ -175,8 +153,8 @@ window.onload = function () {
         gameState = 'dialogue';
         backgroundVisible = false;
         firstDialogueAdvance = true;
-        // Reset dialogue to current location's intro
-        window.setDialogueTrigger(currentLocation.dialogueTrigger);
+        // Transition to the first location dialogue after video
+        window.setDialogueTrigger("clearing");
         currentDialogueIndex = 0;
         currentPartIndex = 0;
     });
@@ -220,7 +198,7 @@ window.onload = function () {
             context.fillStyle = "rgb(0, 0, 0)";
             context.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Redraw background image only if it's been revealed
+            // Redraw background image if it's been revealed or set by dialogue
             if (backgroundVisible && currentBackgroundImg) {
                 // Draw image maintaining aspect ratio, cropping to cover canvas
                 const scale = Math.max(canvas.width / currentBackgroundImg.width, canvas.height / currentBackgroundImg.height);
@@ -231,6 +209,18 @@ window.onload = function () {
                 context.drawImage(currentBackgroundImg, x, y, scaledWidth, scaledHeight);
             }
 
+            // Draw foreground image if available (over background, behind items)
+            if (backgroundVisible && currentForegroundImg) {
+                if (currentForegroundSize.width && currentForegroundSize.height) {
+                    // draw centered using provided size
+                    const fx = (canvas.width - currentForegroundSize.width) / 2;
+                    const fy = (canvas.height - currentForegroundSize.height) / 2;
+                    context.drawImage(currentForegroundImg, fx, fy, currentForegroundSize.width, currentForegroundSize.height);
+                } else {
+                    // default to cover canvas but maintain ratio
+                    context.drawImage(currentForegroundImg, 0, 0, canvas.width, canvas.height);
+                }
+            }
             // Draw interactive items if background is visible
             if (backgroundVisible) {
                 items.forEach(item => {
@@ -248,7 +238,7 @@ window.onload = function () {
                 const boxWidth = mediaBoxWidth;
                 const boxHeight = mediaBoxHeight;
                 const boxX = (canvas.width - boxWidth) / 2;
-                const boxY = (canvas.height - boxHeight) / 2;
+                const boxY = canvas.height / 6; // Position in top third of canvas
 
                 // Draw semi-transparent background box
                 context.fillStyle = "rgba(255, 255, 255, 0.75)";
@@ -284,6 +274,28 @@ window.onload = function () {
     }
     fadeEffect();
 
+    // Load background image directly from dialogue source
+    function loadBackgroundImage(backgroundSrc) {
+        if (backgroundSrc) {
+            let backgroundImg = new Image();
+            backgroundImg.onload = function () {
+                currentBackgroundImg = backgroundImg;
+            }
+            backgroundImg.src = backgroundSrc;
+        }
+    }
+
+    // Load foreground image from dialogue source
+    function loadForegroundImage(foregroundSrc) {
+        if (foregroundSrc) {
+            let foregroundImg = new Image();
+            foregroundImg.onload = function () {
+                currentForegroundImg = foregroundImg;
+            }
+            foregroundImg.src = foregroundSrc;
+        }
+    }
+
     function drawMediaBox(imageSrc, boxWidth = 300, boxHeight = 200) {
         showMediaBox = true;
         mediaBoxWidth = boxWidth;
@@ -309,8 +321,11 @@ window.onload = function () {
             const buttonHeight = 50;
             if (x >= buttonX && x <= buttonX + buttonWidth &&
                 y >= buttonY && y <= buttonY + buttonHeight) {
-                gameState = 'video';
-                video.play();
+                gameState = 'dialogue';
+                window.setDialogueTrigger("intro");
+                currentDialogueIndex = 0;
+                currentPartIndex = 0;
+                firstDialogueAdvance = false; // Allow immediate dialogue advancement for intro
             }
         } else if (gameState === 'video') {
             // Clickable area for media box
@@ -331,8 +346,11 @@ window.onload = function () {
                     y >= item.y && y <= item.y + item.height) {
                     drawMediaBox(item.zoomedImg, 400, 300); // Larger box for zoomed view
                     item.collected = true;
+                    // Find the location index to determine trigger
+                    const locationIndex = locations.findIndex(loc => loc === currentLocation);
+                    const locationNum = locationIndex >= 0 ? locationIndex + 1 : 1;
                     // Set trigger for location-specific dialogue after item collection
-                    window.setDialogueTrigger(currentLocation.dialogueTrigger + "_afterTrigger");
+                    window.setDialogueTrigger(`location${locationNum}_afterTrigger`);
                     break;
                 }
             }

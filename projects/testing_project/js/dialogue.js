@@ -37,6 +37,34 @@ function getCurrentDialogueText() {
     return `${currentDialogue.name}: ${text}`;
 }
 
+// Get current dialogue background
+function getCurrentDialogueBackground() {
+    if (!dialogueData || !dialogueData[currentTrigger]) return null;
+    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
+    return currentDialogue ? currentDialogue.background : null;
+}
+
+// Get current dialogue foreground
+function getCurrentDialogueForeground() {
+    if (!dialogueData || !dialogueData[currentTrigger]) return null;
+    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
+    return currentDialogue ? currentDialogue.foreground : null;
+}
+
+// Get current dialogue foreground size (object with width/height) if provided
+function getCurrentDialogueForegroundSize() {
+    if (!dialogueData || !dialogueData[currentTrigger]) return null;
+    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
+    if (!currentDialogue) return null;
+    if ('foregroundWidth' in currentDialogue || 'foregroundHeight' in currentDialogue) {
+        return {
+            width: currentDialogue.foregroundWidth || null,
+            height: currentDialogue.foregroundHeight || null
+        };
+    }
+    return null;
+}
+
 // Advance to next dialogue part
 function advanceDialogue() {
     // Don't advance dialogue on first Enter press after video (just reveal background)
@@ -59,13 +87,36 @@ function advanceDialogue() {
         currentDialogueIndex++;
         currentPartIndex = 0;
         if (currentDialogueIndex >= dialogueData[currentTrigger].length) {
+            // End of dialogue section reached
             currentDialogueIndex = 0; // Loop back or handle end
+            
+            // Notify when intro dialogue completes
+            if (currentTrigger === "intro" && typeof window.onIntroComplete === 'function') {
+                window.onIntroComplete();
+            }
         }
     }
 
     // Trigger background change at specific dialogue points
     if (typeof window.onDialogueAdvance === 'function') {
         window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
+    }
+
+    // Notify about background/foreground changes (and optional size)
+    if (typeof window.onDialogueBackgroundChange === 'function') {
+        const bg = getCurrentDialogueBackground();
+        const fg = getCurrentDialogueForeground();
+        const fgSize = getCurrentDialogueForegroundSize();
+        if (bg || fg) {
+            if (fgSize) {
+                window.onDialogueBackgroundChange(bg, fg, fgSize);
+            } else {
+                window.onDialogueBackgroundChange(bg, fg);
+            }
+        } else if (fg === null) {
+            // ensure foreground cleared when none provided
+            window.onDialogueBackgroundChange(null, null);
+        }
     }
 }
 
