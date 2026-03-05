@@ -35,7 +35,7 @@ window.onload = function () {
     fetchDialogueData();
     setupDialogueInput();
 
-    let background_imgs = ["src/IMG_2102.jpg", "src/IMG_2103.jpg", "src/IMG_2113.jpg", "src/IMG_2114.jpg", "src/IMG_2125.jpg", "src/IMG_2126.jpg", "src/IMG_2150.jpg"];
+    let background_imgs = ["src/IMG_2102.jpg", "src/IMG_2103.jpg", "src/IMG_2113.jpg", "src/IMG_2114.jpg", "src/IMG_2125.jpg", "src/IMG_2126.jpg", "src/IMG_2150.jpg", "src/IMG_2124.jpg", "src/IMG1.png", "src/IMG2.png", "src/IMG3.png", "src/IMG4.png", "src/IMG5.png"];
 
     //add an image to the canvas in front of the backgrounds
     let foreground_imgs = ["src/IMG_2102.jpg"];
@@ -44,9 +44,20 @@ window.onload = function () {
     let currentBackgroundImg = null;
     let showMediaBox = false;
     let mediaBoxImage = null;
+    let gameState = 'start'; // 'start', 'video', 'dialogue'
+    let video;
+    let backgroundVisible = false;
+    let firstDialogueAdvance = true;
 
     // Callback for dialogue advances to trigger background changes
-    window.onDialogueAdvance = function (dialogueIndex, partIndex) {
+    window.onDialogueAdvance = function (dialogueIndex, partIndex) {        // First Enter press after video reveals the background
+        if (gameState === 'dialogue' && firstDialogueAdvance) {
+            backgroundVisible = true;
+            firstDialogueAdvance = false;
+            // Don't advance dialogue on first press, just reveal background
+            return;
+        }
+        //TODO: add more specific triggers for background changes based on dialogue index and part index
         // Example: change background after first dialogue (index 1, part 0)
         if (dialogueIndex === 1 && partIndex === 0) {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % background_imgs.length;
@@ -60,7 +71,13 @@ window.onload = function () {
         let backgroundImg = new Image();
         backgroundImg.onload = function () {
             currentBackgroundImg = backgroundImg;
-            context.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+            // Draw image maintaining aspect ratio, cropping to cover canvas
+            const scale = Math.max(canvas.width / backgroundImg.width, canvas.height / backgroundImg.height);
+            const scaledWidth = backgroundImg.width * scale;
+            const scaledHeight = backgroundImg.height * scale;
+            const x = (canvas.width - scaledWidth) / 2;
+            const y = (canvas.height - scaledHeight) / 2;
+            context.drawImage(backgroundImg, x, y, scaledWidth, scaledHeight);
         }
 
         backgroundImg.src = background_imgs[currentBackgroundIndex];
@@ -95,91 +112,107 @@ window.onload = function () {
 
 
     //video setup
-    let video = document.getElementById("testVideo");
-    if (video) {
-        video.src = "src/IMG_2102.mp4";
-        video.load();
-        video.play();
-    }
+    video = document.createElement('video');
+    video.src = "src/cometStart.mp4";
+    video.preload = 'auto';
+    video.playbackRate = 2; // Speed up the video (2x speed)
+    video.addEventListener('ended', function () {
+        gameState = 'dialogue';
+        backgroundVisible = false;
+        firstDialogueAdvance = true;
+        // Reset dialogue to intro
+        currentDialogueIndex = 0;
+        currentPartIndex = 0;
+    });
 
     //setup for transitioning effects between backgrounds and foregrounds
-    let alpha = 0;
-    let fadingIn = true;
     function fadeEffect() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.globalAlpha = 1.0;
 
-        // Draw a solid color background for now
-        context.fillStyle = "rgb(49, 49, 49)";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        if (gameState === 'start') {
+            // Draw start screen
+            context.fillStyle = "rgb(0, 0, 0)";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "white";
+            context.font = "24px Roboto";
+            context.textAlign = "center";
+            context.fillText("today I met a shooting star", canvas.width / 2, canvas.height / 2 - 50);
+            // Draw start button
+            context.fillStyle = "rgba(255, 255, 255, 0.8)";
+            context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 25, 100, 50);
+            context.fillStyle = "black";
+            context.fillText("Start", canvas.width / 2, canvas.height / 2 + 5);
+            context.textAlign = "left";
+        } else if (gameState === 'video') {
+            // Draw video
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
 
-        // Redraw background image if loaded
-        if (currentBackgroundImg) {
-            context.drawImage(currentBackgroundImg, 0, 0, canvas.width, canvas.height);
-        }
-
-        // Draw clickable area indicator (semi-transparent rectangle)
-        context.fillStyle = "rgba(255, 255, 255, 0.3)";
-        context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
-        context.strokeStyle = "rgba(255, 255, 255, 0.8)";
-        context.lineWidth = 2;
-        context.strokeRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
-
-        // Draw text on clickable area
-        context.fillStyle = "white";
-        context.font = "14px Roboto";
-        context.fillText("Click me!", canvas.width / 2 - 30, canvas.height / 2 + 5);
-
-        // Fade in the foreground image
-        if (fadingIn) {
-            alpha += 0.01;
-        }
-        // Stop fading in once the foreground image is fully visible
-        if (alpha >= 1) {
-            fadingIn = false;
-        }
-        // Fade out the foreground image after it has fully faded in
-        if (!fadingIn && alpha > 0) {
-            alpha -= 0.01;
-        }
-
-        // Draw dialogue box every frame
-        drawDialogueBox(canvas, context);
-
-        // Draw media box if active
-        if (showMediaBox && mediaBoxImage) {
-            const boxWidth = 300;
-            const boxHeight = 200;
-            const boxX = (canvas.width - boxWidth) / 2;
-            const boxY = (canvas.height - boxHeight) / 2;
-
-            // Draw semi-transparent background box
-            context.fillStyle = "rgba(255, 255, 255, 0.75)";
-            context.fillRect(boxX, boxY, boxWidth, boxHeight);
-
-            // Draw border (optional)
-            context.strokeStyle = "rgba(0, 0, 0, 0.3)";
+            // Draw clickable area indicator
+            context.fillStyle = "rgba(255, 255, 255, 0.3)";
+            context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
+            context.strokeStyle = "rgba(255, 255, 255, 0.8)";
             context.lineWidth = 2;
-            context.strokeRect(boxX, boxY, boxWidth, boxHeight);
+            context.strokeRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
+            context.fillStyle = "white";
+            context.font = "14px Roboto";
+            context.fillText("Click me!", canvas.width / 2 - 30, canvas.height / 2 + 5);
+        } else if (gameState === 'dialogue') {
+            // Draw a solid color background for now
+            context.fillStyle = "rgb(0, 0, 0)";
+            context.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Calculate image dimensions to fit inside the box
-            const padding = 20;
-            const maxImgWidth = boxWidth - (padding * 2);
-            const maxImgHeight = boxHeight - (padding * 2);
-            let imgWidth = mediaBoxImage.width;
-            let imgHeight = mediaBoxImage.height;
+            // Redraw background image only if it's been revealed
+            if (backgroundVisible && currentBackgroundImg) {
+                // Draw image maintaining aspect ratio, cropping to cover canvas
+                const scale = Math.max(canvas.width / currentBackgroundImg.width, canvas.height / currentBackgroundImg.height);
+                const scaledWidth = currentBackgroundImg.width * scale;
+                const scaledHeight = currentBackgroundImg.height * scale;
+                const x = (canvas.width - scaledWidth) / 2;
+                const y = (canvas.height - scaledHeight) / 2;
+                context.drawImage(currentBackgroundImg, x, y, scaledWidth, scaledHeight);
+            }
 
-            // Scale image to fit, maintaining aspect ratio
-            const ratio = Math.min(maxImgWidth / imgWidth, maxImgHeight / imgHeight);
-            imgWidth *= ratio;
-            imgHeight *= ratio;
+            // Draw dialogue box every frame
+            drawDialogueBox(canvas, context);
 
-            // Center image within the box
-            const imgX = boxX + (boxWidth - imgWidth) / 2;
-            const imgY = boxY + (boxHeight - imgHeight) / 2;
+            // Draw media box if active
+            if (showMediaBox && mediaBoxImage) {
+                const boxWidth = 300;
+                const boxHeight = 200;
+                const boxX = (canvas.width - boxWidth) / 2;
+                const boxY = (canvas.height - boxHeight) / 2;
 
-            // Draw the image
-            context.drawImage(mediaBoxImage, imgX, imgY, imgWidth, imgHeight);
+                // Draw semi-transparent background box
+                context.fillStyle = "rgba(255, 255, 255, 0.75)";
+                context.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+                // Draw border
+                context.strokeStyle = "rgba(0, 0, 0, 0.3)";
+                context.lineWidth = 2;
+                context.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+                // Calculate image dimensions to fit inside the box
+                const padding = 20;
+                const maxImgWidth = boxWidth - (padding * 2);
+                const maxImgHeight = boxHeight - (padding * 2);
+                let imgWidth = mediaBoxImage.width;
+                let imgHeight = mediaBoxImage.height;
+
+                // Scale image to fit, maintaining aspect ratio
+                const ratio = Math.min(maxImgWidth / imgWidth, maxImgHeight / imgHeight);
+                imgWidth *= ratio;
+                imgHeight *= ratio;
+
+                // Center image within the box
+                const imgX = boxX + (boxWidth - imgWidth) / 2;
+                const imgY = boxY + (boxHeight - imgHeight) / 2;
+
+                // Draw the image
+                context.drawImage(mediaBoxImage, imgX, imgY, imgWidth, imgHeight);
+            }
         }
 
         requestAnimationFrame(fadeEffect);
@@ -201,15 +234,29 @@ window.onload = function () {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Define clickable area (e.g., center of canvas, 100x100 pixels)
-        const clickableX = canvas.width / 2 - 50;
-        const clickableY = canvas.height / 2 - 50;
-        const clickableWidth = 100;
-        const clickableHeight = 100;
-
-        if (x >= clickableX && x <= clickableX + clickableWidth &&
-            y >= clickableY && y <= clickableY + clickableHeight) {
-            drawMediaBox("src/IMG_2102.jpg", 300, 200);
+        if (gameState === 'start') {
+            // Check if click is on start button (center area)
+            const buttonX = canvas.width / 2 - 50;
+            const buttonY = canvas.height / 2 - 25;
+            const buttonWidth = 100;
+            const buttonHeight = 50;
+            if (x >= buttonX && x <= buttonX + buttonWidth &&
+                y >= buttonY && y <= buttonY + buttonHeight) {
+                gameState = 'video';
+                video.play();
+            }
+        } else if (gameState === 'video') {
+            // Clickable area for media box
+            const clickableX = canvas.width / 2 - 50;
+            const clickableY = canvas.height / 2 - 50;
+            const clickableWidth = 100;
+            const clickableHeight = 100;
+            if (x >= clickableX && x <= clickableX + clickableWidth &&
+                y >= clickableY && y <= clickableY + clickableHeight) {
+                drawMediaBox("src/IMG_2102.jpg", 300, 200);
+                // Set trigger for conditional dialogue
+                window.setDialogueTrigger("afterTrigger");
+            }
         }
     });
 }

@@ -1,5 +1,6 @@
 // Dialogue module - functions to be called from main script.js
 let dialogueData = null;
+let currentTrigger = 'intro'; // Default trigger
 let currentDialogueIndex = 0;
 let currentPartIndex = 0;
 
@@ -24,9 +25,9 @@ function fetchDialogueData() {
 
 // Get current dialogue text
 function getCurrentDialogueText() {
-    if (!dialogueData || !dialogueData["dialogue-text"]) return "Loading dialogue...";
+    if (!dialogueData || !dialogueData[currentTrigger]) return "Loading dialogue...";
 
-    const currentDialogue = dialogueData["dialogue-text"][currentDialogueIndex];
+    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
     if (!currentDialogue) return "End of dialogue.";
 
     const partKey = `t${currentPartIndex + 1}`;
@@ -38,9 +39,17 @@ function getCurrentDialogueText() {
 
 // Advance to next dialogue part
 function advanceDialogue() {
-    if (!dialogueData || !dialogueData["dialogue-text"]) return;
+    // Don't advance dialogue on first Enter press after video (just reveal background)
+    if (typeof firstDialogueAdvance !== 'undefined' && firstDialogueAdvance) {
+        if (typeof window.onDialogueAdvance === 'function') {
+            window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
+        }
+        return;
+    }
 
-    const currentDialogue = dialogueData["dialogue-text"][currentDialogueIndex];
+    if (!dialogueData || !dialogueData[currentTrigger]) return;
+
+    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
     if (!currentDialogue) return;
 
     currentPartIndex++;
@@ -49,7 +58,7 @@ function advanceDialogue() {
         // No more parts, go to next dialogue
         currentDialogueIndex++;
         currentPartIndex = 0;
-        if (currentDialogueIndex >= dialogueData["dialogue-text"].length) {
+        if (currentDialogueIndex >= dialogueData[currentTrigger].length) {
             currentDialogueIndex = 0; // Loop back or handle end
         }
     }
@@ -58,6 +67,13 @@ function advanceDialogue() {
     if (typeof window.onDialogueAdvance === 'function') {
         window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
     }
+}
+
+// Set the current dialogue trigger
+function setDialogueTrigger(trigger) {
+    currentTrigger = trigger;
+    currentDialogueIndex = 0;
+    currentPartIndex = 0;
 }
 
 // Draw a dialogue box on the canvas

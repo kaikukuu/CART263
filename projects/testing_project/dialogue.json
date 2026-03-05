@@ -1,21 +1,29 @@
 {
-    "dialogue-text": [
+    "intro": [
         {
-            "name": "character1",
-            "text": "are you there? look up. I have something to tell you.",
-            "t1": "are you there?",
-            "t2": "look up.",
-            "t3": "I have something to tell you."
+            "name": "??",
+            "t1": "Did you see that?",
+            "t2": "That was me.",
+            "t3": "are you there?",
+            "t4": "look up.",
+            "t5": "I have something to tell you."
         },
         {
-            "name": "character2",
+            "name": "You",
             "t1": "I'm here!",
             "t2": "What is it?"
+        }
+    ],
+    "afterTrigger": [
+        {
+            "name": "Item",
+            "t1": "You picked up the item!",
+            "t2": "I have something to tell you too."
         },
         {
-            "name": "",
-            "t1": "",
-            "t2": "I have something to tell you too."
+            "name": "??",
+            "t1": "dialogue after trigger",
+            "t2": "new branch test"
         }
     ]
 }
