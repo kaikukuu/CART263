@@ -1,54 +1,23 @@
-// Dialogue module - functions to be called from main script.js
+// Simplified Dialogue Module
 let dialogueData = null;
-let currentTrigger = 'intro'; // Default trigger
+let currentTrigger = 'intro';
 let currentDialogueIndex = 0;
 let currentPartIndex = 0;
 
-// Store previous dialogue state for returning after item collection
-let previousDialogueState = null;
+// Load dialogue JSON once at startup
+// Reference: https://www.geeksforgeeks.org/javascript/read-json-file-using-javascript/ & https://www.geeksforgeeks.org/javascript/read-json-file-using-javascript/
 
-// Save current dialogue state
-function saveDialogueState() {
-    previousDialogueState = {
-        trigger: currentTrigger,
-        dialogueIndex: currentDialogueIndex,
-        partIndex: currentPartIndex
-    };
-}
-
-// Restore previous dialogue state
-function restoreDialogueState() {
-    if (previousDialogueState) {
-        currentTrigger = previousDialogueState.trigger;
-        currentDialogueIndex = previousDialogueState.dialogueIndex;
-        currentPartIndex = previousDialogueState.partIndex;
-        previousDialogueState = null;
-    }
-}
-
-// Fetch dialogue data from JSON
-//Converting a JSON Text to a js Object
-//from https://www.geeksforgeeks.org/javascript/read-json-file-using-javascript/
 function fetchDialogueData() {
     fetch('/projects/testing_project/dialogue.json')
-        .then(response => {
-            console.log("Response status:", response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             dialogueData = data;
-            console.log("Dialogue data loaded:", data);
-            updateDialogueDisplay(); // Update DOM after data loads
+            updateDialogueDisplay();
         })
-        .catch(error => {
-            console.error('Failed to fetch data:', error);
-        });
+        .catch(error => console.error('Failed to load dialogue:', error));
 }
 
-// DOM elements (will be initialized when dialogue system is set up)
+// Cached DOM refs (set in setupDialogueInput)
 let dialogueTextElement = null;
 let dialogueChoicesElement = null;
 
@@ -58,14 +27,14 @@ function initDialogueDOM() {
     dialogueChoicesElement = document.getElementById('dialogue-choices');
 }
 
-// Update dialogue display in DOM
+// Refresh dialogue text + buttons
 function updateDialogueDisplay() {
     if (!dialogueTextElement) return;
 
     const text = getCurrentDialogueText();
     dialogueTextElement.textContent = text;
 
-    // Update choices
+    // Show buttons only when choices exist
     const choices = getCurrentDialogueChoices();
     if (choices && choices.length > 0) {
         showDialogueChoices(choices);
@@ -74,239 +43,140 @@ function updateDialogueDisplay() {
     }
 }
 
-// Show dialogue choices as buttons
+// Build choice buttons
 function showDialogueChoices(choices) {
     if (!dialogueChoicesElement) return;
 
-    dialogueChoicesElement.innerHTML = ''; // Clear existing
+    dialogueChoicesElement.innerHTML = ''; // Reset previous buttons
     dialogueChoicesElement.style.display = 'flex';
 
     choices.forEach((choice, index) => {
         const button = document.createElement('button');
         button.textContent = choice;
         button.dataset.choice = choice;
+        button.dataset.index = index; // Keep original choice index
+        // Ref: dataset -> https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset
         button.addEventListener('click', () => {
-            selectChoice(index);
+            selectChoice(parseInt(button.dataset.index));
         });
         dialogueChoicesElement.appendChild(button);
     });
 }
 
-// Hide dialogue choices
+// Hide and clear choices
 function hideDialogueChoices() {
     if (!dialogueChoicesElement) return;
     dialogueChoicesElement.style.display = 'none';
     dialogueChoicesElement.innerHTML = '';
 }
 
-// Get current dialogue text
+// Get the active dialogue object
+function getCurrentDialogue() {
+    if (!dialogueData || !dialogueData[currentTrigger]) return null;
+    return dialogueData[currentTrigger][currentDialogueIndex];
+}
+
+// Get formatted dialogue text
 function getCurrentDialogueText() {
-    if (!dialogueData || !dialogueData[currentTrigger]) return "Loading dialogue...";
+    const dialogue = getCurrentDialogue();
+    if (!dialogue) return "Loading...";
 
-    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    if (!currentDialogue) return "End of dialogue.";
-
-    const partKey = `t${currentPartIndex + 1}`;
-    const text = currentDialogue[partKey];
-    if (!text) return "End of dialogue.";
-
-    return `${currentDialogue.name}: ${text}`;
+    const text = dialogue[`t${currentPartIndex + 1}`];
+    return text ? `${dialogue.name}: ${text}` : "...";
 }
 
-// Get current dialogue background
-function getCurrentDialogueBackground() {
-    if (!dialogueData || !dialogueData[currentTrigger]) return null;
-    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    return currentDialogue ? currentDialogue.background : null;
-}
-
-// Get current dialogue foreground
-function getCurrentDialogueForeground() {
-    if (!dialogueData || !dialogueData[currentTrigger]) return null;
-    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    return currentDialogue ? currentDialogue.foreground : null;
-}
-
-// Get current dialogue foreground size (object with width/height) if provided
-function getCurrentDialogueForegroundSize() {
-    if (!dialogueData || !dialogueData[currentTrigger]) return null;
-    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    if (!currentDialogue) return null;
-    if ('foregroundWidth' in currentDialogue || 'foregroundHeight' in currentDialogue) {
-        return {
-            width: currentDialogue.foregroundWidth || null,
-            height: currentDialogue.foregroundHeight || null
-        };
-    }
-    return null;
-}
-
-// Get current dialogue choices if available
+// Get choices for this dialogue entry (if any)
 function getCurrentDialogueChoices() {
-    if (!dialogueData || !dialogueData[currentTrigger]) return null;
-    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    let choices = currentDialogue ? currentDialogue.next : null;
-
-    // Filter out "ending" choice if not all items are collected
-    if (choices && choices.includes('ending')) {
-        if (typeof window.checkAllItemsCollected === 'function' && !window.checkAllItemsCollected()) {
-            choices = choices.filter(choice => choice !== 'ending');
-        }
-    }
-
-    return choices;
+    const dialogue = getCurrentDialogue();
+    return dialogue ? dialogue.next : null;
 }
 
-// Advance to next dialogue part
+// Move forward one dialogue step
 function advanceDialogue() {
-    // Don't advance dialogue on first Enter press after video (just reveal background)
-    if (typeof firstDialogueAdvance !== 'undefined' && firstDialogueAdvance) {
-        if (typeof window.onDialogueAdvance === 'function') {
-            window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
-        }
-        return;
-    }
+    const dialogue = getCurrentDialogue();
+    if (!dialogue) return;
 
-    if (!dialogueData || !dialogueData[currentTrigger]) return;
+    // Stop here if player needs to choose
+    if (getCurrentDialogueChoices()) return;
 
-    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    if (!currentDialogue) return;
-
-    // If current part has choices, don't advance until a choice is made
-    // But first check if items are collected to determine if choices should be shown
-    const choices = getCurrentDialogueChoices();
-    if (choices && choices.length > 0) {
-        // Check if all items in current location are collected before showing choices
-        if (typeof window.checkItemsCollected === 'function') {
-            const allItemsCollected = window.checkItemsCollected();
-            if (!allItemsCollected) {
-                // Don't show choices yet, items not collected
-                return;
-            }
-        }
-        // Items collected, choices can be shown
-        return;
-    }
-
-    currentPartIndex++;
-    const nextPartKey = `t${currentPartIndex + 1}`;
-    if (!currentDialogue[nextPartKey]) {
-        // No more parts, go to next dialogue
+    // Check if there's a next part
+    if (dialogue[`t${currentPartIndex + 2}`]) {
+        currentPartIndex++;
+    } else {
+        // Otherwise go to next dialogue entry
         currentDialogueIndex++;
         currentPartIndex = 0;
+
+        // End of branch behavior
         if (currentDialogueIndex >= dialogueData[currentTrigger].length) {
-            // End of dialogue section reached
-            // if this was an item-specific dialogue, restore previous state to return to correct position
-            if (currentTrigger && currentTrigger.endsWith('_afterTrigger')) {
-                restoreDialogueState();
-            }
-            // Special case for intro dialogue to not reset to 0 when completed, allowing background to remain
-            if (!previousDialogueState) {
-                currentDialogueIndex = 0; // Only reset if not restoring state
+            // Ending finishes the game instead of looping
+            if (currentTrigger === 'ending') {
+                if (typeof window.onEndingComplete === 'function') {
+                    window.onEndingComplete();
+                }
+                return;
             }
 
-            // Notify when intro dialogue completes
-            if (currentTrigger === "intro" && typeof window.onIntroComplete === 'function') {
-                window.onIntroComplete();
+            // *_afterTrigger branches bounce back to their base location
+            if (currentTrigger.endsWith('_afterTrigger')) {
+                const baseTrigger = currentTrigger.replace('_afterTrigger', '');
+                setDialogueTrigger(baseTrigger);
+                return;
             }
+
+            // Regular branches loop
+            currentDialogueIndex = 0;
         }
     }
 
-    // Trigger background change at specific dialogue points if defined in JSON
-    if (typeof window.onDialogueAdvance === 'function') {
-        window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
-    }
-
-    // Notify about background/foreground changes (and optional size)
-    if (typeof window.onDialogueBackgroundChange === 'function') {
-        const bg = getCurrentDialogueBackground();
-        const fg = getCurrentDialogueForeground();
-        const fgSize = getCurrentDialogueForegroundSize();
-        if (bg || fg) {
-            if (fgSize) {
-                window.onDialogueBackgroundChange(bg, fg, fgSize);
-            } else {
-                window.onDialogueBackgroundChange(bg, fg);
-            }
-        } else if (fg === null) {
-            // ensure foreground cleared when none provided
-            window.onDialogueBackgroundChange(null, null);
-        }
-    }
-
-    // Update DOM display after dialogue advances
     updateDialogueDisplay();
+    notifyDialogueChange();
 }
 
-// Set the current dialogue trigger
+// Jump to a different dialogue branch
 function setDialogueTrigger(trigger) {
     currentTrigger = trigger;
     currentDialogueIndex = 0;
     currentPartIndex = 0;
     updateDialogueDisplay();
+    notifyDialogueChange();
 }
 
-// Handle choice selection
+// Apply selected choice
 function selectChoice(choiceIndex) {
     const choices = getCurrentDialogueChoices();
     if (!choices || choiceIndex < 0 || choiceIndex >= choices.length) return;
 
-    const selectedTrigger = choices[choiceIndex];
-    setDialogueTrigger(selectedTrigger);
+    setDialogueTrigger(choices[choiceIndex]);
+}
 
-    // Notify about the choice selection and trigger background changes
-    if (typeof window.onDialogueChoiceSelected === 'function') {
-        window.onDialogueChoiceSelected(selectedTrigger);
-    }
-
-    // Trigger background change for the new location if defined in JSON
-    if (typeof window.onDialogueBackgroundChange === 'function') {
-        const bg = getCurrentDialogueBackground();
-        const fg = getCurrentDialogueForeground();
-        const fgSize = getCurrentDialogueForegroundSize();
-        if (bg || fg) {
-            if (fgSize) {
-                window.onDialogueBackgroundChange(bg, fg, fgSize);
-            } else {
-                window.onDialogueBackgroundChange(bg, fg);
-            }
-        }
+// Tell script.js that dialogue state changed
+function notifyDialogueChange() {
+    if (typeof window.onDialogueChange === 'function') {
+        const dialogue = getCurrentDialogue();
+        window.onDialogueChange({
+            trigger: currentTrigger,
+            dialogue: dialogue,
+            index: currentDialogueIndex,
+            part: currentPartIndex
+        });
     }
 }
 
-// Setup dialogue keyboard input -> listen for Enter to advance dialogue and arrow keys to select choices
+// Setup keyboard input for dialogue
+// Ref: KeyboardEvent.key -> https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 function setupDialogueInput() {
-    // Initialize DOM element references
     initDialogueDOM();
 
     document.addEventListener("keydown", function (event) {
-        const choices = getCurrentDialogueChoices();
-
-        if (choices && choices.length > 0) {
-            // Handle choice selection with arrow keys
-            if (event.key === "ArrowLeft") {
-                selectChoice(0); // Left choice (forest)
-                console.log("Left arrow pressed! Selected:", choices[0]);
-                event.preventDefault();
-            } else if (event.key === "ArrowRight") {
-                selectChoice(1); // Right choice (town)
-                console.log("Right arrow pressed! Selected:", choices[1]);
-                event.preventDefault();
+        if (event.key === "Enter") {
+            // If item popup is open, close it first
+            if (window.isMediaBoxOpen && window.isMediaBoxOpen()) {
+                window.closeMediaBox();
+            } else {
+                advanceDialogue();
             }
-        } else {
-            // Normal dialogue advancement with Enter
-            if (event.key === "Enter") {
-                // close media box if it's open
-                if (typeof window.isMediaBoxOpen === 'function' && window.isMediaBoxOpen()) {
-                    if (typeof window.closeMediaBox === 'function') {
-                        window.closeMediaBox();
-                    }
-                } else {
-                    // Otherwise advance dialogue
-                    advanceDialogue();
-                    console.log("Enter key pressed! Current dialogue:", getCurrentDialogueText());
-                }
-            }
+            event.preventDefault();
         }
     });
 }

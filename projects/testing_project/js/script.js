@@ -4,19 +4,21 @@ window.onload = function () {
     let canvas = document.getElementById("testCanvas");
     //get the context
     let context = canvas.getContext("2d");
+    let itemLayer = null;
+    let isGameReady = false;
 
     //reference for using the canvas API: https://www.w3schools.com/jsref/api_canvas.asp
 
     function resizeCanvas() {
-        const ratio = 500 / 500;          // aspect ratio (1:1)
+        const ratio = 500 / 500;          // Keep a square canvas (1:1)
         const maxWidth = window.innerWidth * 0.9;  // 90% of viewport width
         const maxHeight = window.innerHeight * 0.9; // 90% of viewport height
 
-        // Calculate size that fits in viewport while maintaining aspect ratio
+        // Fit canvas in the viewport while keeping that ratio
         let w = maxWidth;
         let h = w / ratio;
 
-        // If height exceeds viewport, scale down based on height instead
+        // If it's too tall, scale by height instead
         if (h > maxHeight) {
             h = maxHeight;
             w = h * ratio;
@@ -24,19 +26,25 @@ window.onload = function () {
 
         canvas.width = w;
         canvas.height = h;
+        if (isGameReady) {
+            updateItemLayer();
+        }
     }
 
     window.addEventListener('resize', resizeCanvas);
+    itemLayer = document.getElementById('item-layer');
     resizeCanvas();
 
-    context.fillStyle = "rgba(255,0,0,255)";
+    const startScreen = document.getElementById('start-screen');
+    const startButton = document.getElementById('start-button');
+    const endScreen = document.getElementById('end-screen');
 
-    // Initialize dialogue system
+    // Load dialogue data first
     fetchDialogueData();
     // (setupDialogueInput will be called later once helper functions like
     // closeMediaBox/isMediaBoxOpen are defined)
 
-    // Define locations as a simple mapping from dialogue triggers to items
+    // Location -> collectible items
     const locations = {
         "clearing": [
             { x: 150, y: 200, width: 50, height: 50, smallImg: 'src/imgs/CAP1.png', zoomedImg: 'src/imgs/CAP1.png', collected: false },
@@ -46,16 +54,16 @@ window.onload = function () {
             { x: 200, y: 250, width: 50, height: 50, smallImg: 'src/imgs/CAP1.png', zoomedImg: 'src/imgs/CAP1.png', collected: false },
             { x: 350, y: 100, width: 50, height: 50, smallImg: 'src/imgs/CAP2.png', zoomedImg: 'src/imgs/CAP2.png', collected: false }
         ],
-        "alley": [
+        "town": [
             { x: 100, y: 300, width: 50, height: 50, smallImg: 'src/imgs/CAP1.png', zoomedImg: 'src/imgs/CAP1.png', collected: false },
             { x: 250, y: 200, width: 50, height: 50, smallImg: 'src/imgs/CAP2.png', zoomedImg: 'src/imgs/CAP2.png', collected: false }
         ]
     };
 
-    // Load item images for all locations
+    // Preload item images for every location
     Object.values(locations).forEach(locationItems => {
         locationItems.forEach((item) => {
-            // Create Image objects from the string paths
+            // Turn string paths into Image objects
             const smallImgObj = new Image();
             smallImgObj.src = item.smallImg;
             item.smallImg = smallImgObj;
@@ -66,116 +74,120 @@ window.onload = function () {
         });
     });
 
-    //add an image to the canvas in front of the backgrounds
-    // array holds current foreground source; we'll clear it until dialogue specifies one
-    // size for current foreground image (width, height)
     let currentBackgroundImg = null;
     let currentForegroundImg = null;
     let currentForegroundSize = { width: null, height: null };
     let backgroundVisible = false;
-    let currentLocation = "clearing"; // Start with clearing location
-    let items = locations[currentLocation]; // Reference to current location's items
-    let showMediaBox = false;
-    let mediaBoxImage = null;
-    let mediaBoxWidth = 300;
-    let mediaBoxHeight = 200;
-    let gameState = 'start'; // 'start', 'video', 'dialogue'
+    let currentTrigger = 'intro'; // Which dialogue branch we're in right now
+    let currentLocation = "clearing"; // Current playable area
+    let items = locations[currentLocation]; // Items for the current area
+    let gameState = 'start'; // start, video, dialogue, end
     let video;
     let firstDialogueAdvance = true;
+    let introComplete = false; // True once intro hits its last entry
 
-    // Callback for dialogue advances to trigger background changes
-    window.onDialogueAdvance = function (dialogueIndex, partIndex) {        // First Enter press after video reveals the background
+    // Main callback from dialogue.js whenever text/trigger changes
+    window.onDialogueChange = function (data) {
+        const { trigger, dialogue, index, part } = data;
+        currentTrigger = trigger; // Used by rendering + click logic
+
+        // After video ends, first Enter just reveals the scene
         if (gameState === 'dialogue' && firstDialogueAdvance) {
+            // Queue background first, then reveal
+            if (dialogue.background) {
+                loadBackgroundImage(dialogue.background);
+            }
             backgroundVisible = true;
             firstDialogueAdvance = false;
-            // Don't advance dialogue on first press, just reveal background
             return;
         }
-        //TODO: add more specific triggers for dialogue events based on dialogue index and part index
-        // Backgrounds are now dialogue-driven, specified in dialogue.json
-        // Clear foreground if current dialogue doesn't specify one
-        const currentDialogue = dialogueData && dialogueData[currentTrigger] ? dialogueData[currentTrigger][dialogueIndex] : null;
-        if (currentDialogue && !currentDialogue.foreground) {
+
+        // When intro loops back to index 0, start the video
+        if (trigger === 'intro' && index === 0 && introComplete) {
+            gameState = 'video';
+            video.play();
+            introComplete = false; // Reset in case intro is replayed
+            return;
+        }
+
+        // Mark intro as complete when it reaches its last line
+        if (trigger === 'intro' && dialogueData && dialogueData.intro && index === dialogueData.intro.length - 1) {
+            introComplete = true;
+        }
+
+        // If trigger is a playable location, switch active items list
+        if (locations[trigger] && trigger !== currentLocation) {
+            currentLocation = trigger;
+            items = locations[currentLocation];
+        }
+
+        // Update background from dialogue entry
+        if (dialogue.background) {
+            loadBackgroundImage(dialogue.background);
+            backgroundVisible = true;
+        }
+
+        // Update optional foreground overlay from dialogue entry
+        if (dialogue.foreground) {
             currentForegroundImg = null;
-        }
-    };
-
-    // Callback when dialogue specifies a background/foreground change
-    window.onDialogueBackgroundChange = function (backgroundSrc, foregroundSrc, foregroundSize) {
-        if (backgroundSrc) {
-            // Update location based on current dialogue trigger **only if it changed**
-            if (locations[currentTrigger] && currentTrigger !== currentLocation) {
-                currentLocation = currentTrigger;
-                items = locations[currentTrigger];
-                // Reset collected items when entering a different location
-                items.forEach(item => item.collected = false);
-            }
-            // Load background image directly from dialogue
-            loadBackgroundImage(backgroundSrc);
-            backgroundVisible = true; // Make background visible when dialogue specifies it
-        }
-
-        if (foregroundSrc) {
-            currentForegroundImg = null; // clear old foreground
-            //optionally dialogue may provide size via third argument
-            if (foregroundSize) {
-                currentForegroundSize = Object.assign({}, foregroundSize);
-            } else {
-                currentForegroundSize = { width: null, height: null };
-            }
-            loadForegroundImage(foregroundSrc);
+            currentForegroundSize = dialogue.foregroundWidth ?
+                { width: dialogue.foregroundWidth, height: null } :
+                { width: null, height: null };
+            loadForegroundImage(dialogue.foreground);
         } else {
-            // clear if dialogue has no foreground for this entry
             currentForegroundImg = null;
             currentForegroundSize = { width: null, height: null };
         }
+
+        updateItemLayer();
     };
 
-    // Callback for when intro dialogue completes
-    window.onIntroComplete = function () {
-        gameState = 'video';
-        video.play();
-    };
-
-    // Callback for when a dialogue choice is selected
-    window.onDialogueChoiceSelected = function (selectedTrigger) {
-        // Update location based on selected choice's trigger if it corresponds to a location and is different from current
-        if (locations[selectedTrigger] && selectedTrigger !== currentLocation) {
-            currentLocation = selectedTrigger;
-            items = locations[currentLocation];
-            // Reset collected state of items when changing location
-            items.forEach(item => item.collected = false);
-        }
-    };
-
-    // Function to check if all items in current location are collected
+    // Quick check for current location only
     window.checkItemsCollected = function () {
         return items.every(item => item.collected);
     };
 
-    // Function to check if ALL items across ALL locations are collected
+    // Check if all six items are collected across all locations
+    // Ref: Array.every -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every
     window.checkAllItemsCollected = function () {
         return Object.values(locations).every(locationItems =>
             locationItems.every(item => item.collected)
         );
     };
 
-    // Function to close the media box
+    // Called by dialogue.js when ending dialogue is done
+    window.onEndingComplete = function () {
+        gameState = 'end';
+        backgroundVisible = false;
+        const dialogueBox = document.getElementById('dialogue-box');
+        if (dialogueBox) {
+            dialogueBox.style.display = 'none';
+        }
+        if (endScreen) {
+            endScreen.style.display = 'flex';
+        }
+        if (itemLayer) {
+            itemLayer.style.display = 'none';
+            itemLayer.innerHTML = '';
+        }
+        window.closeMediaBox();
+    };
+
+    // Hide the media popup
     window.closeMediaBox = function () {
         const mediaBox = document.getElementById('media-box');
         if (mediaBox) {
             mediaBox.style.display = 'none';
         }
-        showMediaBox = false;
-        mediaBoxImage = null;
     };
 
-    // Helper so other modules can check if media is visible
+    // Let dialogue.js know if media popup is open
     window.isMediaBoxOpen = function () {
-        return !!showMediaBox;
+        const mediaBox = document.getElementById('media-box');
+        return mediaBox && mediaBox.style.display === 'block';
     };
 
-    // Now that all helper functions are defined, we can setup dialogue input
+    // Safe to bind Enter key controls now
     setupDialogueInput();
 
     // Setup media box close button
@@ -184,7 +196,7 @@ window.onload = function () {
         closeMediaBtn.addEventListener('click', window.closeMediaBox);
     }
 
-    //video setup
+    // Configure intro cutscene video
     video = document.createElement('video');
     video.src = "src/onlyComet.mp4";
     video.preload = 'auto';
@@ -193,44 +205,54 @@ window.onload = function () {
         gameState = 'dialogue';
         backgroundVisible = false;
         firstDialogueAdvance = true;
-        // Transition to the first location dialogue after video
         window.setDialogueTrigger("clearing");
-        currentDialogueIndex = 0;
-        currentPartIndex = 0;
     });
 
-    // setup for the main game loop using requestAnimationFrame to create a fade effect and handle drawing
+    // Start game from DOM button
+    function startGame() {
+        gameState = 'dialogue';
+        if (startScreen) {
+            startScreen.style.display = 'none';
+        }
+        const dialogueBox = document.getElementById('dialogue-box');
+        if (dialogueBox) {
+            dialogueBox.style.display = 'block';
+        }
+        window.setDialogueTrigger("intro");
+        firstDialogueAdvance = false;
+        updateItemLayer();
+    }
+
+    if (startButton) {
+        startButton.addEventListener('click', startGame);
+    }
+
+    isGameReady = true;
+
+    // Main render loop
+    // Ref: requestAnimationFrame -> https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame
     function fadeEffect() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.globalAlpha = 1.0;
 
         if (gameState === 'start') {
-            // Draw start screen
+            // Start screen is DOM-based, just keep canvas dark behind it
             context.fillStyle = "rgb(0, 0, 0)";
             context.fillRect(0, 0, canvas.width, canvas.height);
-            context.fillStyle = "white";
-            context.font = "24px Roboto";
-            context.textAlign = "center";
-            context.fillText("today I met a shooting star", canvas.width / 2, canvas.height / 2 - 50);
-            // Draw start button
-            context.fillStyle = "rgba(255, 255, 255, 0.8)";
-            context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 25, 100, 50);
-            context.fillStyle = "black";
-            context.fillText("Start", canvas.width / 2, canvas.height / 2 + 5);
-            context.textAlign = "left";
         } else if (gameState === 'video') {
-            // Draw video
-            if (video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+            // Cutscene video
+            if (video.readyState >= 2) { // HAVE_CURRENT_DATA or better
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
             }
         } else if (gameState === 'dialogue') {
-            // Draw a solid color background for now
+            // Base fill behind dialogue scenes
             context.fillStyle = "rgb(0, 0, 0)";
             context.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Redraw background image if it's been revealed or set by dialogue
+            // Draw scene background once available
             if (backgroundVisible && currentBackgroundImg) {
-                // Draw image maintaining aspect ratio, cropping to cover canvas
+                // Cover canvas while keeping image ratio
+                // Ref: drawImage -> https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
                 const scale = Math.max(canvas.width / currentBackgroundImg.width, canvas.height / currentBackgroundImg.height);
                 const scaledWidth = currentBackgroundImg.width * scale;
                 const scaledHeight = currentBackgroundImg.height * scale;
@@ -239,10 +261,10 @@ window.onload = function () {
                 context.drawImage(currentBackgroundImg, x, y, scaledWidth, scaledHeight);
             }
 
-            // Draw foreground image if available (over background, behind items)
+            // Draw optional foreground layer on top of background
             if (backgroundVisible && currentForegroundImg) {
                 if (currentForegroundSize.width && currentForegroundSize.height) {
-                    // draw centered using provided size
+                    // If dialogue gave a size, center it
                     const fx = (canvas.width - currentForegroundSize.width) / 2;
                     const fy = (canvas.height - currentForegroundSize.height) / 2;
                     context.drawImage(currentForegroundImg, fx, fy, currentForegroundSize.width, currentForegroundSize.height);
@@ -251,21 +273,17 @@ window.onload = function () {
                     context.drawImage(currentForegroundImg, 0, 0, canvas.width, canvas.height);
                 }
             }
-            // Draw interactive items if background is visible and not in intro
-            if (backgroundVisible && currentTrigger !== 'intro') {
-                items.forEach(item => {
-                    if (!item.collected && item.smallImg.complete) {
-                        context.drawImage(item.smallImg, item.x, item.y, item.width, item.height);
-                    }
-                });
-            }
+        } else if (gameState === 'end') {
+            // End screen is DOM-based, keep canvas dark behind it
+            context.fillStyle = "rgb(0, 0, 0)";
+            context.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         requestAnimationFrame(fadeEffect);
     }
     fadeEffect();
 
-    // Load background image directly from dialogue source
+    // Load a background image from dialogue data
     function loadBackgroundImage(backgroundSrc) {
         if (backgroundSrc) {
             let backgroundImg = new Image();
@@ -276,7 +294,7 @@ window.onload = function () {
         }
     }
 
-    // Load foreground image from dialogue source
+    // Load an optional foreground image from dialogue data
     function loadForegroundImage(foregroundSrc) {
         if (foregroundSrc) {
             let foregroundImg = new Image();
@@ -287,14 +305,14 @@ window.onload = function () {
         }
     }
 
-    // Function to display media box with given image source and size
+    // Show the media popup for collected items
     function drawMediaBox(imageOrSrc) {
         const mediaBox = document.getElementById('media-box');
         const mediaImage = document.getElementById('media-image');
 
         if (!mediaBox || !mediaImage) return;
 
-        // Handle both Image objects and string paths for flexibility
+        // Accept either an Image object or a plain string path
         if (imageOrSrc instanceof Image) {
             mediaImage.src = imageOrSrc.src;
         } else {
@@ -302,48 +320,68 @@ window.onload = function () {
         }
 
         mediaBox.style.display = 'block';
-        showMediaBox = true; // Keep for compatibility
     }
 
-    // Canvas click listener for interactive elements
-    canvas.addEventListener('click', function (event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+    function collectItem(item) {
+        if (!item || item.collected) return;
 
-        if (gameState === 'start') {
-            // Check if click is on start button (center area)
-            const buttonX = canvas.width / 2 - 50;
-            const buttonY = canvas.height / 2 - 25;
-            const buttonWidth = 100;
-            const buttonHeight = 50;
-            if (x >= buttonX && x <= buttonX + buttonWidth &&
-                y >= buttonY && y <= buttonY + buttonHeight) {
-                gameState = 'dialogue';
-                // Show dialogue box
-                const dialogueBox = document.getElementById('dialogue-box');
-                if (dialogueBox) {
-                    dialogueBox.style.display = 'block';
-                }
-                window.setDialogueTrigger("intro");
-                currentDialogueIndex = 0;
-                currentPartIndex = 0;
-                firstDialogueAdvance = false; // Allow immediate dialogue advancement for intro
-            }
-        } else if (gameState === 'dialogue' && backgroundVisible) {
-            // Check for item clicks
-            for (let item of items) {
-                if (!item.collected && x >= item.x && x <= item.x + item.width &&
-                    y >= item.y && y <= item.y + item.height) {
-                    drawMediaBox(item.zoomedImg, 400, 300); // Larger box for zoomed view
-                    item.collected = true;
-                    // Save current dialogue state before switching to afterTrigger dialogue
-                    saveDialogueState();
-                    // Set trigger for location-specific dialogue after item collection
-                    window.setDialogueTrigger(`${currentLocation}_afterTrigger`);
-                    break;
-                }
-            }
+        drawMediaBox(item.zoomedImg);
+        item.collected = true;
+        updateItemLayer();
+
+        if (window.checkAllItemsCollected()) {
+            window.setDialogueTrigger('ending');
+        } else {
+            window.setDialogueTrigger(`${currentLocation}_afterTrigger`);
         }
-    });
+    }
+
+    // Render collectible items as DOM nodes aligned to the canvas
+    // Ref: getBoundingClientRect -> https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+    function updateItemLayer() {
+        if (!itemLayer) return;
+
+        const shouldShowItems =
+            gameState === 'dialogue' &&
+            backgroundVisible &&
+            currentTrigger !== 'intro' &&
+            currentTrigger !== 'ending';
+
+        itemLayer.innerHTML = '';
+
+        if (!shouldShowItems) {
+            itemLayer.style.display = 'none';
+            return;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = rect.width / canvas.width;
+        const scaleY = rect.height / canvas.height;
+
+        itemLayer.style.display = 'block';
+
+        items.forEach((item) => {
+            if (item.collected || !item.smallImg || !item.smallImg.complete) return;
+
+            const itemButton = document.createElement('button');
+            itemButton.className = 'item-node';
+            itemButton.style.left = `${rect.left + item.x * scaleX}px`;
+            itemButton.style.top = `${rect.top + item.y * scaleY}px`;
+            itemButton.style.width = `${item.width * scaleX}px`;
+            itemButton.style.height = `${item.height * scaleY}px`;
+
+            const itemImage = document.createElement('img');
+            itemImage.src = item.smallImg.src;
+            itemImage.alt = 'Collectible item';
+            itemButton.appendChild(itemImage);
+
+            itemButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                collectItem(item);
+            });
+
+            itemLayer.appendChild(itemButton);
+        });
+    }
 }

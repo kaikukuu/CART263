@@ -48,8 +48,7 @@
             "t2": "There's something eerie about this place. There's buildings here but no one around.",
             "next": [
                 "forest",
-                "town",
-                "ending"
+                "town"
             ]
         }
     ],
@@ -66,8 +65,7 @@
             "t2": "I wonder what happened here.",
             "next": [
                 "clearing",
-                "town",
-                "ending"
+                "town"
             ]
         }
     ],
@@ -102,14 +100,13 @@
             "t2": "What should I do next?",
             "next": [
                 "clearing",
-                "forest",
-                "ending"
+                "forest"
             ]
         }
     ],
     "ending": [
         {
-            "background": "src/IMG_2113.jpg",
+            "background": "src/IMG_2114.jpg",
             "name": "Star",
             "t1": "Thank you for finding me.",
             "t2": "I can now restore the light to this world."
@@ -119,14 +116,14 @@
             "t1": "I still don't understand what's happening."
         },
         {
-            "background": "src/IMG_2113.jpg",
+            "background": "src/IMG_2114.jpg",
             "name": "Star",
             "t1": "I am a shooting star that fell from the sky.",
             "t2": "I've been waiting long for someone to find me. To show me this world is worth saving.",
             "t3": "Thank you for helping me. I will return you to where you belong now. Goodbye."
         },
         {
-            "background": "src/IMG_2113.jpg",
+            "background": "src/IMG_2114.jpg",
             "name": "You",
             "t1": "Goodbye."
         }
@@ -141,63 +138,25 @@
         {
             "background": "src/IMG2.png",
             "name": "??",
-            "t1": "Keep looking, you're getting closer.",
-            "next": [
-                "clearing",
-                "forest",
-                "ending"
-            ]
+            "t1": "Keep looking, you're getting closer."
         }
     ],
     "forest_afterTrigger": [
         {
-            "background": "src/IMG_2114.jpg",
             "name": "Item",
             "t1": "A frozen artifact from the forest!",
             "t2": "It's cold to the touch."
         },
         {
-            "background": "src/IMG_2114.jpg",
             "name": "??",
-            "t1": "You found it!",
-            "t2": "This piece is important.",
-            "t3": "Please continue searching.",
-            "next": [
-                "clearing",
-                "town",
-                "ending"
-            ]
+            "t3": "Please continue searching."
         }
     ],
-    "alley_afterTrigger": [
+    "town_afterTrigger": [
         {
-            "background": "src/IMG_2125.jpg",
             "name": "Item",
-            "t1": "A mysterious object hidden in the alley!",
+            "t1": "A mysterious object hidden in the town!",
             "t2": "It seems to pulse with energy."
-        },
-        {
-            "background": "src/IMG_2125.jpg",
-            "name": "??",
-            "t1": "Yes! You found it!",
-            "t2": "You're almost there.",
-            "t3": "Just a little more to go.",
-            "next": [
-                "clearing",
-                "forest",
-                "ending"
-            ]
-        },
-        {
-            "name": "Item",
-            "t1": "You found a mysterious glowing orb!",
-            "t2": "It hums with ancient power."
-        },
-        {
-            "name": "??",
-            "t1": "This orb will lead you to me.",
-            "t2": "Come find me before it's too late.",
-            "t3": "My life fire is fading, I need your help to find me before I disappear forever."
         }
     ]
 }

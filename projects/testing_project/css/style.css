@@ -11,6 +11,67 @@ body {
 
 }
 
+/* DOM overlay screens */
+#start-screen,
+#end-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 30;
+    text-align: center;
+}
+
+#start-title,
+#end-screen h1 {
+    color: white;
+    font-size: 28px;
+    font-weight: 400;
+    text-align: center;
+}
+
+#start-button {
+    padding: 12px 28px;
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 6px;
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+}
+
+#start-button:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* DOM item overlay above canvas */
+#item-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.item-node {
+    position: fixed;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.item-node img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 canvas {
     display: block;
     /* removes the inline‑element gutter */
@@ -133,8 +194,6 @@ div:hover {
 #close-media:hover {
     background: rgba(0, 0, 0, 0.9) !important;
 }
-
-#id {}
 
 /* style for main dialogue text */
 #dialogueText p {
