@@ -2,11 +2,10 @@
     "intro": [
         {
             "background": "src/IMG_2113.jpg",
-            "foreground": "src/shooting star.png",
+            "foreground": null,
             "name": "??",
             "t1": "come find me.",
-            "t2": "Welcome to my world.",
-            "t3": "I have been waiting for you."
+            "t2": "I have been waiting for you."
         },
         {
             "background": "src/IMG_2113.jpg",
@@ -49,16 +48,20 @@
     ],
     "clearing": [
         {
-            "background": "src/IMG_2113.jpg",
+            "background": "src/IMG2.png",
             "name": "??",
             "t1": "Welcome to the forest clearing.",
-            "t2": "can you find me?",
+            "t2": "can you hear me?",
             "t3": "Look around and see what you can find."
         },
         {
             "name": "You",
             "t1": "It;s so quiet here.",
-            "t2": "This looks interesting."
+            "t2": "This looks interesting.",
+            "next": [
+                "forest",
+                "town"
+            ]
         }
     ],
     "forest": [
@@ -73,10 +76,14 @@
             "background": "src/IMG_2114.jpg",
             "name": "You",
             "t1": "There's something eerie about this place. There's buildings here but no one around.",
-            "t2": "I wonder what happened here."
+            "t2": "I wonder what happened here.",
+            "next": [
+                "clearing",
+                "town"
+            ]
         }
     ],
-    "alley": [
+    "town": [
         {
             "background": "src/IMG_2125.jpg",
             "name": "??",
@@ -104,10 +111,72 @@
             "foreground": "src/imgs/receive.png",
             "name": "You",
             "t1": "Of course! I want to help you.",
-            "t2": "How can I share my energy with you?"
+            "t2": "How can I share my energy with you?",
+            "next": [
+                "clearing",
+                "forest",
+                "location1_afterTrigger",
+                "location2_afterTrigger",
+                "location3_afterTrigger"
+            ]
         }
     ],
-    "location1_afterTrigger": [
+    "item": [
+        {
+            "name": "Item",
+            "t1": "You found an item!",
+            "t2": "It might be useful."
+        },
+        {
+            "name": "??",
+            "t1": "This item holds a secret.",
+            "t2": "Use it wisely."
+        }
+    ],
+    "clearing_afterTrigger": [
+        {
+            "background": "src/IMG2.png",
+            "name": "Item",
+            "t1": "You found something in the clearing!",
+            "t2": "It glows softly."
+        },
+        {
+            "background": "src/IMG2.png",
+            "name": "??",
+            "t1": "That belongs to me.",
+            "t2": "Thank you for finding it.",
+            "t3": "Keep looking, you're getting closer."
+        }
+    ],
+    "forest_afterTrigger": [
+        {
+            "background": "src/IMG_2114.jpg",
+            "name": "Item",
+            "t1": "A frozen artifact from the forest!",
+            "t2": "It's cold to the touch."
+        },
+        {
+            "background": "src/IMG_2114.jpg",
+            "name": "??",
+            "t1": "You found it!",
+            "t2": "This piece is important.",
+            "t3": "Please continue searching."
+        }
+    ],
+    "alley_afterTrigger": [
+        {
+            "background": "src/IMG_2125.jpg",
+            "name": "Item",
+            "t1": "A mysterious object hidden in the alley!",
+            "t2": "It seems to pulse with energy."
+        },
+        {
+            "background": "src/IMG_2125.jpg",
+            "name": "??",
+            "t1": "Yes! You found it!",
+            "t2": "You're almost there.",
+            "t3": "Just a little more to go."
+        },
         {
             "name": "Item",
             "t1": "You found a mysterious glowing orb!",
@@ -118,30 +187,6 @@
             "t1": "This orb will lead you to me.",
             "t2": "Come find me before it's too late.",
             "t3": "My life fire is fading, I need your help to find me before I disappear forever."
-        }
-    ],
-    "location2_afterTrigger": [
-        {
-            "name": "Item",
-            "t1": "You discovered a bottle cap!",
-            "t2": "What wisdom does it hold?"
-        },
-        {
-            "name": "??",
-            "t1": "This contains knowledge from the past.",
-            "t2": "Study it carefully."
-        }
-    ],
-    "location3_afterTrigger": [
-        {
-            "name": "Item",
-            "t1": "You picked up the item!",
-            "t2": "I have something to tell you too."
-        },
-        {
-            "name": "??",
-            "t1": "dialogue after trigger",
-            "t2": "new branch test"
         }
     ]
 }

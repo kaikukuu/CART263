@@ -65,6 +65,13 @@ function getCurrentDialogueForegroundSize() {
     return null;
 }
 
+// Get current dialogue choices if available
+function getCurrentDialogueChoices() {
+    if (!dialogueData || !dialogueData[currentTrigger]) return null;
+    const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
+    return currentDialogue ? currentDialogue.next : null;
+}
+
 // Advance to next dialogue part
 function advanceDialogue() {
     // Don't advance dialogue on first Enter press after video (just reveal background)
@@ -80,6 +87,21 @@ function advanceDialogue() {
     const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
     if (!currentDialogue) return;
 
+    // Check if current dialogue has choices - if so, check if items are collected first
+    const choices = getCurrentDialogueChoices();
+    if (choices && choices.length > 0) {
+        // Check if all items in current location are collected before showing choices
+        if (typeof window.checkItemsCollected === 'function') {
+            const allItemsCollected = window.checkItemsCollected();
+            if (!allItemsCollected) {
+                // Don't show choices yet, items not collected
+                return;
+            }
+        }
+        // Items collected, choices can be shown
+        return;
+    }
+
     currentPartIndex++;
     const nextPartKey = `t${currentPartIndex + 1}`;
     if (!currentDialogue[nextPartKey]) {
@@ -89,7 +111,7 @@ function advanceDialogue() {
         if (currentDialogueIndex >= dialogueData[currentTrigger].length) {
             // End of dialogue section reached
             currentDialogueIndex = 0; // Loop back or handle end
-            
+
             // Notify when intro dialogue completes
             if (currentTrigger === "intro" && typeof window.onIntroComplete === 'function') {
                 window.onIntroComplete();
@@ -127,9 +149,38 @@ function setDialogueTrigger(trigger) {
     currentPartIndex = 0;
 }
 
+// Handle choice selection
+function selectChoice(choiceIndex) {
+    const choices = getCurrentDialogueChoices();
+    if (!choices || choiceIndex < 0 || choiceIndex >= choices.length) return;
+
+    const selectedTrigger = choices[choiceIndex];
+    setDialogueTrigger(selectedTrigger);
+
+    // Notify about the choice selection and trigger background changes
+    if (typeof window.onDialogueChoiceSelected === 'function') {
+        window.onDialogueChoiceSelected(selectedTrigger);
+    }
+
+    // Trigger background change for the new location
+    if (typeof window.onDialogueBackgroundChange === 'function') {
+        const bg = getCurrentDialogueBackground();
+        const fg = getCurrentDialogueForeground();
+        const fgSize = getCurrentDialogueForegroundSize();
+        if (bg || fg) {
+            if (fgSize) {
+                window.onDialogueBackgroundChange(bg, fg, fgSize);
+            } else {
+                window.onDialogueBackgroundChange(bg, fg);
+            }
+        }
+    }
+}
+
 // Draw a dialogue box on the canvas
 function drawDialogueBox(canvas, context, boxHeight = 150) {
     const text = getCurrentDialogueText();
+    const choices = getCurrentDialogueChoices();
 
     // Position in bottom third of canvas
     const boxWidth = canvas.width * 0.9;  // 90% of canvas width
@@ -149,20 +200,70 @@ function drawDialogueBox(canvas, context, boxHeight = 150) {
     context.fillStyle = "white";
     context.font = "16px Roboto";
     const padding = 20;
-    const textX = boxX + padding;
-    const textY = boxY + padding + 20;
+    let textY = boxY + padding + 20;
     const maxWidth = boxWidth - (padding * 2);
+    const textX = boxX + padding;
 
-    // Simple text wrapping (optional - just draws the text as-is)
+    // Draw main dialogue text
     context.fillText(text, textX, textY, maxWidth);
+
+    // Draw choices if available
+    if (choices && choices.length > 0) {
+        textY += 40; // Add space after main text
+
+        // Draw choice instructions
+        context.fillStyle = "yellow";
+        context.font = "14px Roboto";
+        context.fillText("Choose your path:", textX, textY);
+        textY += 25;
+
+        // Draw each choice
+        context.fillStyle = "white";
+        context.font = "16px Roboto";
+        choices.forEach((choice, index) => {
+            const choiceText = `${index === 0 ? '← Left:' : '→ Right:'} ${choice}`;
+            context.fillText(choiceText, textX + 20, textY);
+            textY += 25;
+        });
+
+        // Draw input hint
+        textY += 10;
+        context.fillStyle = "gray";
+        context.font = "12px Roboto";
+        context.fillText("Use ← → arrow keys to choose", textX, textY);
+    }
 }
 
 // Setup dialogue keyboard input
 function setupDialogueInput() {
     document.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            advanceDialogue();
-            console.log("Enter key pressed! Current dialogue:", getCurrentDialogueText());
+        const choices = getCurrentDialogueChoices();
+
+        if (choices && choices.length > 0) {
+            // Handle choice selection with arrow keys
+            if (event.key === "ArrowLeft") {
+                selectChoice(0); // Left choice (forest)
+                console.log("Left arrow pressed! Selected:", choices[0]);
+                event.preventDefault();
+            } else if (event.key === "ArrowRight") {
+                selectChoice(1); // Right choice (town)
+                console.log("Right arrow pressed! Selected:", choices[1]);
+                event.preventDefault();
+            }
+        } else {
+            // Normal dialogue advancement with Enter
+            if (event.key === "Enter") {
+                // First check if media box is open and close it
+                if (typeof window.showMediaBox !== 'undefined' && window.showMediaBox) {
+                    if (typeof window.closeMediaBox === 'function') {
+                        window.closeMediaBox();
+                    }
+                } else {
+                    // Otherwise advance dialogue
+                    advanceDialogue();
+                    console.log("Enter key pressed! Current dialogue:", getCurrentDialogueText());
+                }
+            }
         }
     });
 }

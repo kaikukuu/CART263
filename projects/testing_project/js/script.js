@@ -35,45 +35,45 @@ window.onload = function () {
     fetchDialogueData();
     setupDialogueInput();
 
-    // Define locations with items only (backgrounds are now dialogue-driven)
-    let locations = [
-        {
-            items: [
-                { x: 150, y: 200, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2102.jpg', collected: false },
-                { x: 300, y: 150, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2103.jpg', collected: false }
-            ],
-            dialogueTrigger: "clearing"
-        },
-        {
-            items: [
-                { x: 200, y: 250, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2113.jpg', collected: false },
-                { x: 350, y: 100, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2114.jpg', collected: false }
-            ],
-            dialogueTrigger: "forest"
-        },
-        {
-            items: [
-                { x: 100, y: 300, width: 50, height: 50, smallImg: new Image(), zoomedImg: 'src/IMG_2125.jpg', collected: false }
-            ],
-            dialogueTrigger: "alley"
-        }
-    ];
+    // Define locations as a simple mapping from dialogue triggers to items
+    const locations = {
+        "clearing": [
+            { x: 150, y: 200, width: 50, height: 50, smallImg: 'src/imgs/CAP1.png', zoomedImg: 'src/imgs/CAP1.png', collected: false },
+            { x: 300, y: 150, width: 50, height: 50, smallImg: 'src/imgs/CAP2.png', zoomedImg: 'src/imgs/CAP2.png', collected: false }
+        ],
+        "forest": [
+            { x: 200, y: 250, width: 50, height: 50, smallImg: 'src/imgs/CAP1.png', zoomedImg: 'src/imgs/CAP1.png', collected: false },
+            { x: 350, y: 100, width: 50, height: 50, smallImg: 'src/imgs/CAP2.png', zoomedImg: 'src/imgs/CAP2.png', collected: false }
+        ],
+        "alley": [
+            { x: 100, y: 300, width: 50, height: 50, smallImg: 'src/imgs/CAP1.png', zoomedImg: 'src/imgs/CAP1.png', collected: false },
+            { x: 250, y: 200, width: 50, height: 50, smallImg: 'src/imgs/CAP2.png', zoomedImg: 'src/imgs/CAP2.png', collected: false }
+        ]
+    };
 
     // Load item images for all locations
-    locations.forEach(location => {
-        location.items.forEach((item, index) => {
-            // Assign small images based on index 
-            const smallImgs = ['src/IMG1.png', 'src/IMG2.png', 'src/IMG3.png', 'src/IMG4.png', 'src/IMG5.png'];
-            item.smallImg.src = smallImgs[index % smallImgs.length];
+    Object.values(locations).forEach(locationItems => {
+        locationItems.forEach((item) => {
+            // Create Image objects from the string paths
+            const smallImgObj = new Image();
+            smallImgObj.src = item.smallImg;
+            item.smallImg = smallImgObj;
+
+            const zoomedImgObj = new Image();
+            zoomedImgObj.src = item.zoomedImg;
+            item.zoomedImg = zoomedImgObj;
         });
     });
 
     //add an image to the canvas in front of the backgrounds
     // array holds current foreground source; we'll clear it until dialogue specifies one
     // size for current foreground image (width, height)
+    let currentBackgroundImg = null;
+    let currentForegroundImg = null;
     let currentForegroundSize = { width: null, height: null };
-    let currentLocation = locations[0]; // Start with first location
-    let items = currentLocation.items; // Reference to current location's items
+    let backgroundVisible = false;
+    let currentLocation = "clearing"; // Start with clearing location
+    let items = locations[currentLocation]; // Reference to current location's items
     let showMediaBox = false;
     let mediaBoxImage = null;
     let mediaBoxWidth = 300;
@@ -102,11 +102,10 @@ window.onload = function () {
     // Callback when dialogue specifies a background/foreground change
     window.onDialogueBackgroundChange = function (backgroundSrc, foregroundSrc) {
         if (backgroundSrc) {
-            // Find location by matching dialogue trigger
-            const newLocation = locations.find(loc => loc.dialogueTrigger === currentTrigger) || currentLocation;
-            if (newLocation !== currentLocation) {
-                currentLocation = newLocation;
-                items = currentLocation.items;
+            // Update location based on current dialogue trigger
+            if (locations[currentTrigger]) {
+                currentLocation = currentTrigger;
+                items = locations[currentTrigger];
                 // Reset collected items when entering new location
                 items.forEach(item => item.collected = false);
             }
@@ -136,17 +135,32 @@ window.onload = function () {
         gameState = 'video';
         video.play();
     };
-    //user input setup
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") {
-            showMediaBox = false;
-            mediaBoxImage = null;
+
+    // Callback for when a dialogue choice is selected
+    window.onDialogueChoiceSelected = function (selectedTrigger) {
+        // Update location based on the selected dialogue trigger
+        if (locations[selectedTrigger]) {
+            currentLocation = selectedTrigger;
+            items = locations[currentLocation];
+            // Reset collected items when entering new location
+            items.forEach(item => item.collected = false);
         }
-    });
+    };
+
+    // Function to check if all items in current location are collected
+    window.checkItemsCollected = function () {
+        return items.every(item => item.collected);
+    };
+
+    // Function to close the media box
+    window.closeMediaBox = function () {
+        showMediaBox = false;
+        mediaBoxImage = null;
+    };
 
     //video setup
     video = document.createElement('video');
-    video.src = "src/cometStart.mp4";
+    video.src = "src/onlyComet.mp4";
     video.preload = 'auto';
     video.playbackRate = 2; // Speed up the video (2x speed)
     video.addEventListener('ended', function () {
@@ -160,6 +174,7 @@ window.onload = function () {
     });
 
     //setup for transitioning effects between backgrounds and foregrounds
+    //
     function fadeEffect() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.globalAlpha = 1.0;
@@ -184,15 +199,15 @@ window.onload = function () {
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
             }
 
-            // Draw clickable area indicator
-            context.fillStyle = "rgba(255, 255, 255, 0.3)";
-            context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
-            context.strokeStyle = "rgba(255, 255, 255, 0.8)";
-            context.lineWidth = 2;
-            context.strokeRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
-            context.fillStyle = "white";
-            context.font = "14px Roboto";
-            context.fillText("Click me!", canvas.width / 2 - 30, canvas.height / 2 + 5);
+            // // Draw clickable area indicator
+            // context.fillStyle = "rgba(255, 255, 255, 0.3)";
+            // context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
+            // context.strokeStyle = "rgba(255, 255, 255, 0.8)";
+            // context.lineWidth = 2;
+            // context.strokeRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
+            // context.fillStyle = "white";
+            // context.font = "14px Roboto";
+            // context.fillText("Click me!", canvas.width / 2 - 30, canvas.height / 2 + 5);
         } else if (gameState === 'dialogue') {
             // Draw a solid color background for now
             context.fillStyle = "rgb(0, 0, 0)";
@@ -221,8 +236,8 @@ window.onload = function () {
                     context.drawImage(currentForegroundImg, 0, 0, canvas.width, canvas.height);
                 }
             }
-            // Draw interactive items if background is visible
-            if (backgroundVisible) {
+            // Draw interactive items if background is visible and not in intro
+            if (backgroundVisible && currentTrigger !== 'intro') {
                 items.forEach(item => {
                     if (!item.collected && item.smallImg.complete) {
                         context.drawImage(item.smallImg, item.x, item.y, item.width, item.height);
@@ -296,15 +311,21 @@ window.onload = function () {
         }
     }
 
-    function drawMediaBox(imageSrc, boxWidth = 300, boxHeight = 200) {
+    function drawMediaBox(imageOrSrc, boxWidth = 300, boxHeight = 200) {
         showMediaBox = true;
         mediaBoxWidth = boxWidth;
         mediaBoxHeight = boxHeight;
-        const img = new Image();
-        img.onload = function () {
-            mediaBoxImage = img;
-        };
-        img.src = imageSrc;
+        
+        // Handle both Image objects and string paths
+        if (imageOrSrc instanceof Image) {
+            mediaBoxImage = imageOrSrc;
+        } else {
+            const img = new Image();
+            img.onload = function () {
+                mediaBoxImage = img;
+            };
+            img.src = imageOrSrc;
+        }
     }
 
     // Canvas click listener for interactive elements
@@ -327,18 +348,6 @@ window.onload = function () {
                 currentPartIndex = 0;
                 firstDialogueAdvance = false; // Allow immediate dialogue advancement for intro
             }
-        } else if (gameState === 'video') {
-            // Clickable area for media box
-            const clickableX = canvas.width / 2 - 50;
-            const clickableY = canvas.height / 2 - 50;
-            const clickableWidth = 100;
-            const clickableHeight = 100;
-            if (x >= clickableX && x <= clickableX + clickableWidth &&
-                y >= clickableY && y <= clickableY + clickableHeight) {
-                drawMediaBox("src/IMG_2102.jpg", 300, 200);
-                // Set trigger for conditional dialogue
-                window.setDialogueTrigger("afterTrigger");
-            }
         } else if (gameState === 'dialogue' && backgroundVisible) {
             // Check for item clicks
             for (let item of items) {
@@ -346,11 +355,23 @@ window.onload = function () {
                     y >= item.y && y <= item.y + item.height) {
                     drawMediaBox(item.zoomedImg, 400, 300); // Larger box for zoomed view
                     item.collected = true;
-                    // Find the location index to determine trigger
-                    const locationIndex = locations.findIndex(loc => loc === currentLocation);
-                    const locationNum = locationIndex >= 0 ? locationIndex + 1 : 1;
                     // Set trigger for location-specific dialogue after item collection
-                    window.setDialogueTrigger(`location${locationNum}_afterTrigger`);
+                    window.setDialogueTrigger(`${currentLocation}_afterTrigger`);
+
+                    // Trigger background change for the collected item location
+                    if (typeof window.onDialogueBackgroundChange === 'function') {
+                        // These functions are defined in dialogue.js
+                        const bg = getCurrentDialogueBackground();
+                        const fg = getCurrentDialogueForeground();
+                        const fgSize = getCurrentDialogueForegroundSize();
+                        if (bg || fg) {
+                            if (fgSize) {
+                                window.onDialogueBackgroundChange(bg, fg, fgSize);
+                            } else {
+                                window.onDialogueBackgroundChange(bg, fg);
+                            }
+                        }
+                    }
                     break;
                 }
             }
