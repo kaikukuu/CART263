@@ -4,6 +4,28 @@ let currentTrigger = 'intro'; // Default trigger
 let currentDialogueIndex = 0;
 let currentPartIndex = 0;
 
+// Store previous dialogue state for returning after item collection
+let previousDialogueState = null;
+
+// Save current dialogue state
+function saveDialogueState() {
+    previousDialogueState = {
+        trigger: currentTrigger,
+        dialogueIndex: currentDialogueIndex,
+        partIndex: currentPartIndex
+    };
+}
+
+// Restore previous dialogue state
+function restoreDialogueState() {
+    if (previousDialogueState) {
+        currentTrigger = previousDialogueState.trigger;
+        currentDialogueIndex = previousDialogueState.dialogueIndex;
+        currentPartIndex = previousDialogueState.partIndex;
+        previousDialogueState = null;
+    }
+}
+
 // Fetch dialogue data from JSON
 function fetchDialogueData() {
     fetch('/projects/testing_project/dialogue.json')
@@ -69,7 +91,16 @@ function getCurrentDialogueForegroundSize() {
 function getCurrentDialogueChoices() {
     if (!dialogueData || !dialogueData[currentTrigger]) return null;
     const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
-    return currentDialogue ? currentDialogue.next : null;
+    let choices = currentDialogue ? currentDialogue.next : null;
+
+    // Filter out "ending" choice if not all items are collected
+    if (choices && choices.includes('ending')) {
+        if (typeof window.checkAllItemsCollected === 'function' && !window.checkAllItemsCollected()) {
+            choices = choices.filter(choice => choice !== 'ending');
+        }
+    }
+
+    return choices;
 }
 
 // Advance to next dialogue part
@@ -110,7 +141,14 @@ function advanceDialogue() {
         currentPartIndex = 0;
         if (currentDialogueIndex >= dialogueData[currentTrigger].length) {
             // End of dialogue section reached
-            currentDialogueIndex = 0; // Loop back or handle end
+            // if this was an item-specific trigger, return to previous location
+            if (currentTrigger && currentTrigger.endsWith('_afterTrigger')) {
+                restoreDialogueState();
+            }
+            // Don't reset dialogue index if we restored state - keep the exact position
+            if (!previousDialogueState) {
+                currentDialogueIndex = 0; // Only reset if not restoring state
+            }
 
             // Notify when intro dialogue completes
             if (currentTrigger === "intro" && typeof window.onIntroComplete === 'function') {
@@ -253,8 +291,8 @@ function setupDialogueInput() {
         } else {
             // Normal dialogue advancement with Enter
             if (event.key === "Enter") {
-                // First check if media box is open and close it
-                if (typeof window.showMediaBox !== 'undefined' && window.showMediaBox) {
+                // close media box if it's open
+                if (typeof window.isMediaBoxOpen === 'function' && window.isMediaBoxOpen()) {
                     if (typeof window.closeMediaBox === 'function') {
                         window.closeMediaBox();
                     }

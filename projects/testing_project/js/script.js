@@ -33,7 +33,8 @@ window.onload = function () {
 
     // Initialize dialogue system
     fetchDialogueData();
-    setupDialogueInput();
+    // (setupDialogueInput will be called later once helper functions like
+    // closeMediaBox/isMediaBoxOpen are defined)
 
     // Define locations as a simple mapping from dialogue triggers to items
     const locations = {
@@ -100,13 +101,13 @@ window.onload = function () {
     };
 
     // Callback when dialogue specifies a background/foreground change
-    window.onDialogueBackgroundChange = function (backgroundSrc, foregroundSrc) {
+    window.onDialogueBackgroundChange = function (backgroundSrc, foregroundSrc, foregroundSize) {
         if (backgroundSrc) {
-            // Update location based on current dialogue trigger
-            if (locations[currentTrigger]) {
+            // Update location based on current dialogue trigger **only if it changed**
+            if (locations[currentTrigger] && currentTrigger !== currentLocation) {
                 currentLocation = currentTrigger;
                 items = locations[currentTrigger];
-                // Reset collected items when entering new location
+                // Reset collected items when entering a different location
                 items.forEach(item => item.collected = false);
             }
             // Load background image directly from dialogue
@@ -116,9 +117,9 @@ window.onload = function () {
 
         if (foregroundSrc) {
             currentForegroundImg = null; // clear old foreground
-            // optionally dialogue may provide size via additional argument
-            if (arguments.length > 2 && arguments[2]) {
-                currentForegroundSize = Object.assign({}, arguments[2]);
+            //optionally dialogue may provide size via third argument
+            if (foregroundSize) {
+                currentForegroundSize = Object.assign({}, foregroundSize);
             } else {
                 currentForegroundSize = { width: null, height: null };
             }
@@ -138,8 +139,8 @@ window.onload = function () {
 
     // Callback for when a dialogue choice is selected
     window.onDialogueChoiceSelected = function (selectedTrigger) {
-        // Update location based on the selected dialogue trigger
-        if (locations[selectedTrigger]) {
+        // Update location based on the selected dialogue trigger if it's actually different
+        if (locations[selectedTrigger] && selectedTrigger !== currentLocation) {
             currentLocation = selectedTrigger;
             items = locations[currentLocation];
             // Reset collected items when entering new location
@@ -152,17 +153,32 @@ window.onload = function () {
         return items.every(item => item.collected);
     };
 
+    // Function to check if ALL items across ALL locations are collected
+    window.checkAllItemsCollected = function () {
+        return Object.values(locations).every(locationItems =>
+            locationItems.every(item => item.collected)
+        );
+    };
+
     // Function to close the media box
     window.closeMediaBox = function () {
         showMediaBox = false;
         mediaBoxImage = null;
     };
 
+    // Helper so other modules can check if media is visible
+    window.isMediaBoxOpen = function () {
+        return !!showMediaBox;
+    };
+
+    // Now that all helper functions exist, initialize dialogue input listener
+    setupDialogueInput();
+
     //video setup
     video = document.createElement('video');
     video.src = "src/onlyComet.mp4";
     video.preload = 'auto';
-    video.playbackRate = 2; // Speed up the video (2x speed)
+    video.playbackRate = 4; // Speed up the video (2x speed)
     video.addEventListener('ended', function () {
         gameState = 'dialogue';
         backgroundVisible = false;
@@ -315,7 +331,7 @@ window.onload = function () {
         showMediaBox = true;
         mediaBoxWidth = boxWidth;
         mediaBoxHeight = boxHeight;
-        
+
         // Handle both Image objects and string paths
         if (imageOrSrc instanceof Image) {
             mediaBoxImage = imageOrSrc;
@@ -355,23 +371,10 @@ window.onload = function () {
                     y >= item.y && y <= item.y + item.height) {
                     drawMediaBox(item.zoomedImg, 400, 300); // Larger box for zoomed view
                     item.collected = true;
+                    // Save current dialogue state before switching to afterTrigger dialogue
+                    saveDialogueState();
                     // Set trigger for location-specific dialogue after item collection
                     window.setDialogueTrigger(`${currentLocation}_afterTrigger`);
-
-                    // Trigger background change for the collected item location
-                    if (typeof window.onDialogueBackgroundChange === 'function') {
-                        // These functions are defined in dialogue.js
-                        const bg = getCurrentDialogueBackground();
-                        const fg = getCurrentDialogueForeground();
-                        const fgSize = getCurrentDialogueForegroundSize();
-                        if (bg || fg) {
-                            if (fgSize) {
-                                window.onDialogueBackgroundChange(bg, fg, fgSize);
-                            } else {
-                                window.onDialogueBackgroundChange(bg, fg);
-                            }
-                        }
-                    }
                     break;
                 }
             }
