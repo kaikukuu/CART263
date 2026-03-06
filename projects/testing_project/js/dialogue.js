@@ -27,6 +27,8 @@ function restoreDialogueState() {
 }
 
 // Fetch dialogue data from JSON
+//Converting a JSON Text to a js Object
+//from https://www.geeksforgeeks.org/javascript/read-json-file-using-javascript/
 function fetchDialogueData() {
     fetch('/projects/testing_project/dialogue.json')
         .then(response => {
@@ -170,7 +172,8 @@ function advanceDialogue() {
     const currentDialogue = dialogueData[currentTrigger][currentDialogueIndex];
     if (!currentDialogue) return;
 
-    // Check if current dialogue has choices - if so, check if items are collected first
+    // If current part has choices, don't advance until a choice is made
+    // But first check if items are collected to determine if choices should be shown
     const choices = getCurrentDialogueChoices();
     if (choices && choices.length > 0) {
         // Check if all items in current location are collected before showing choices
@@ -193,11 +196,11 @@ function advanceDialogue() {
         currentPartIndex = 0;
         if (currentDialogueIndex >= dialogueData[currentTrigger].length) {
             // End of dialogue section reached
-            // if this was an item-specific trigger, return to previous location
+            // if this was an item-specific dialogue, restore previous state to return to correct position
             if (currentTrigger && currentTrigger.endsWith('_afterTrigger')) {
                 restoreDialogueState();
             }
-            // Don't reset dialogue index if we restored state - keep the exact position
+            // Special case for intro dialogue to not reset to 0 when completed, allowing background to remain
             if (!previousDialogueState) {
                 currentDialogueIndex = 0; // Only reset if not restoring state
             }
@@ -209,7 +212,7 @@ function advanceDialogue() {
         }
     }
 
-    // Trigger background change at specific dialogue points
+    // Trigger background change at specific dialogue points if defined in JSON
     if (typeof window.onDialogueAdvance === 'function') {
         window.onDialogueAdvance(currentDialogueIndex, currentPartIndex);
     }
@@ -256,7 +259,7 @@ function selectChoice(choiceIndex) {
         window.onDialogueChoiceSelected(selectedTrigger);
     }
 
-    // Trigger background change for the new location
+    // Trigger background change for the new location if defined in JSON
     if (typeof window.onDialogueBackgroundChange === 'function') {
         const bg = getCurrentDialogueBackground();
         const fg = getCurrentDialogueForeground();
@@ -271,7 +274,7 @@ function selectChoice(choiceIndex) {
     }
 }
 
-// Setup dialogue keyboard input
+// Setup dialogue keyboard input -> listen for Enter to advance dialogue and arrow keys to select choices
 function setupDialogueInput() {
     // Initialize DOM element references
     initDialogueDOM();

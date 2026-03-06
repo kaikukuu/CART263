@@ -55,12 +55,12 @@
     ],
     "forest": [
         {
-            "background": "src/IMG_2114.jpg",
+            "background": "src/IMG1.png",
             "name": "??",
             "t1": "You've entered the frozen forest."
         },
         {
-            "background": "src/IMG_2114.jpg",
+            "background": "src/IMG3.png",
             "name": "You",
             "t1": "I need to find those star shards.",
             "t2": "I wonder what happened here.",
@@ -141,7 +141,12 @@
         {
             "background": "src/IMG2.png",
             "name": "??",
-            "t1": "Keep looking, you're getting closer."
+            "t1": "Keep looking, you're getting closer.",
+            "next": [
+                "clearing",
+                "forest",
+                "ending"
+            ]
         }
     ],
     "forest_afterTrigger": [
@@ -156,7 +161,12 @@
             "name": "??",
             "t1": "You found it!",
             "t2": "This piece is important.",
-            "t3": "Please continue searching."
+            "t3": "Please continue searching.",
+            "next": [
+                "clearing",
+                "town",
+                "ending"
+            ]
         }
     ],
     "alley_afterTrigger": [
@@ -171,7 +181,12 @@
             "name": "??",
             "t1": "Yes! You found it!",
             "t2": "You're almost there.",
-            "t3": "Just a little more to go."
+            "t3": "Just a little more to go.",
+            "next": [
+                "clearing",
+                "forest",
+                "ending"
+            ]
         },
         {
             "name": "Item",

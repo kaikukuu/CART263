@@ -139,11 +139,11 @@ window.onload = function () {
 
     // Callback for when a dialogue choice is selected
     window.onDialogueChoiceSelected = function (selectedTrigger) {
-        // Update location based on the selected dialogue trigger if it's actually different
+        // Update location based on selected choice's trigger if it corresponds to a location and is different from current
         if (locations[selectedTrigger] && selectedTrigger !== currentLocation) {
             currentLocation = selectedTrigger;
             items = locations[currentLocation];
-            // Reset collected items when entering new location
+            // Reset collected state of items when changing location
             items.forEach(item => item.collected = false);
         }
     };
@@ -175,7 +175,7 @@ window.onload = function () {
         return !!showMediaBox;
     };
 
-    // Now that all helper functions exist, initialize dialogue input listener
+    // Now that all helper functions are defined, we can setup dialogue input
     setupDialogueInput();
 
     // Setup media box close button
@@ -199,8 +199,7 @@ window.onload = function () {
         currentPartIndex = 0;
     });
 
-    //setup for transitioning effects between backgrounds and foregrounds
-    //
+    // setup for the main game loop using requestAnimationFrame to create a fade effect and handle drawing
     function fadeEffect() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.globalAlpha = 1.0;
@@ -224,16 +223,6 @@ window.onload = function () {
             if (video.readyState >= 2) { // HAVE_CURRENT_DATA or higher
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
             }
-
-            // // Draw clickable area indicator
-            // context.fillStyle = "rgba(255, 255, 255, 0.3)";
-            // context.fillRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
-            // context.strokeStyle = "rgba(255, 255, 255, 0.8)";
-            // context.lineWidth = 2;
-            // context.strokeRect(canvas.width / 2 - 50, canvas.height / 2 - 50, 100, 100);
-            // context.fillStyle = "white";
-            // context.font = "14px Roboto";
-            // context.fillText("Click me!", canvas.width / 2 - 30, canvas.height / 2 + 5);
         } else if (gameState === 'dialogue') {
             // Draw a solid color background for now
             context.fillStyle = "rgb(0, 0, 0)";
@@ -270,9 +259,6 @@ window.onload = function () {
                     }
                 });
             }
-
-            // Dialogue box is now DOM-based, no canvas drawing needed
-            // Media box is also now DOM-based, no canvas drawing needed
         }
 
         requestAnimationFrame(fadeEffect);
@@ -301,13 +287,14 @@ window.onload = function () {
         }
     }
 
-    function drawMediaBox(imageOrSrc, boxWidth = 300, boxHeight = 200) {
+    // Function to display media box with given image source and size
+    function drawMediaBox(imageOrSrc) {
         const mediaBox = document.getElementById('media-box');
         const mediaImage = document.getElementById('media-image');
 
         if (!mediaBox || !mediaImage) return;
 
-        // Handle both Image objects and string paths
+        // Handle both Image objects and string paths for flexibility
         if (imageOrSrc instanceof Image) {
             mediaImage.src = imageOrSrc.src;
         } else {
