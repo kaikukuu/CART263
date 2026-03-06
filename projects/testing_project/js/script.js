@@ -162,6 +162,10 @@ window.onload = function () {
 
     // Function to close the media box
     window.closeMediaBox = function () {
+        const mediaBox = document.getElementById('media-box');
+        if (mediaBox) {
+            mediaBox.style.display = 'none';
+        }
         showMediaBox = false;
         mediaBoxImage = null;
     };
@@ -173,6 +177,12 @@ window.onload = function () {
 
     // Now that all helper functions exist, initialize dialogue input listener
     setupDialogueInput();
+
+    // Setup media box close button
+    const closeMediaBtn = document.getElementById('close-media');
+    if (closeMediaBtn) {
+        closeMediaBtn.addEventListener('click', window.closeMediaBox);
+    }
 
     //video setup
     video = document.createElement('video');
@@ -261,44 +271,8 @@ window.onload = function () {
                 });
             }
 
-            // Draw dialogue box every frame
-            drawDialogueBox(canvas, context);
-
-            // Draw media box if active
-            if (showMediaBox && mediaBoxImage) {
-                const boxWidth = mediaBoxWidth;
-                const boxHeight = mediaBoxHeight;
-                const boxX = (canvas.width - boxWidth) / 2;
-                const boxY = canvas.height / 6; // Position in top third of canvas
-
-                // Draw semi-transparent background box
-                context.fillStyle = "rgba(255, 255, 255, 0.75)";
-                context.fillRect(boxX, boxY, boxWidth, boxHeight);
-
-                // Draw border
-                context.strokeStyle = "rgba(0, 0, 0, 0.3)";
-                context.lineWidth = 2;
-                context.strokeRect(boxX, boxY, boxWidth, boxHeight);
-
-                // Calculate image dimensions to fit inside the box
-                const padding = 20;
-                const maxImgWidth = boxWidth - (padding * 2);
-                const maxImgHeight = boxHeight - (padding * 2);
-                let imgWidth = mediaBoxImage.width;
-                let imgHeight = mediaBoxImage.height;
-
-                // Scale image to fit, maintaining aspect ratio
-                const ratio = Math.min(maxImgWidth / imgWidth, maxImgHeight / imgHeight);
-                imgWidth *= ratio;
-                imgHeight *= ratio;
-
-                // Center image within the box
-                const imgX = boxX + (boxWidth - imgWidth) / 2;
-                const imgY = boxY + (boxHeight - imgHeight) / 2;
-
-                // Draw the image
-                context.drawImage(mediaBoxImage, imgX, imgY, imgWidth, imgHeight);
-            }
+            // Dialogue box is now DOM-based, no canvas drawing needed
+            // Media box is also now DOM-based, no canvas drawing needed
         }
 
         requestAnimationFrame(fadeEffect);
@@ -328,20 +302,20 @@ window.onload = function () {
     }
 
     function drawMediaBox(imageOrSrc, boxWidth = 300, boxHeight = 200) {
-        showMediaBox = true;
-        mediaBoxWidth = boxWidth;
-        mediaBoxHeight = boxHeight;
+        const mediaBox = document.getElementById('media-box');
+        const mediaImage = document.getElementById('media-image');
+
+        if (!mediaBox || !mediaImage) return;
 
         // Handle both Image objects and string paths
         if (imageOrSrc instanceof Image) {
-            mediaBoxImage = imageOrSrc;
+            mediaImage.src = imageOrSrc.src;
         } else {
-            const img = new Image();
-            img.onload = function () {
-                mediaBoxImage = img;
-            };
-            img.src = imageOrSrc;
+            mediaImage.src = imageOrSrc;
         }
+
+        mediaBox.style.display = 'block';
+        showMediaBox = true; // Keep for compatibility
     }
 
     // Canvas click listener for interactive elements
@@ -359,6 +333,11 @@ window.onload = function () {
             if (x >= buttonX && x <= buttonX + buttonWidth &&
                 y >= buttonY && y <= buttonY + buttonHeight) {
                 gameState = 'dialogue';
+                // Show dialogue box
+                const dialogueBox = document.getElementById('dialogue-box');
+                if (dialogueBox) {
+                    dialogueBox.style.display = 'block';
+                }
                 window.setDialogueTrigger("intro");
                 currentDialogueIndex = 0;
                 currentPartIndex = 0;

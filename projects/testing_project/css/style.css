@@ -1,7 +1,6 @@
 * {
     margin: 0;
     padding: 0;
-    background-color: aliceblue;
 }
 
 body {
@@ -34,44 +33,105 @@ div:hover {
     cursor: pointer;
 }
 
-/*** BUTTON ****/
-#Button {
-    padding: 5px;
-    background-color: rgb(158, 153, 163);
-    width: max-content;
-    margin-left: 1vw;
-    margin-top: 10px;
-    border-radius: 2px;
-    box-shadow: 2px 2px;
-
+/* DOM Dialogue Box */
+#dialogue-box {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 10;
+    box-sizing: border-box;
 }
 
-#bubbleButton:hover {
-    color: rgb(158, 153, 163);
-    background: white;
-
+#dialogue-content {
+    background: transparent !important;
 }
 
-.bubble {
-    width: 15px;
-    height: 15px;
-    background-color: blue;
-    border-radius: 7px;
-    position: absolute;
-
+#dialogue-text {
+    color: white !important;
+    background: transparent !important;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
 }
 
-#non-interactive-text p {
-    position: absolute;
+#dialogue-choices {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    background: transparent !important;
+}
+
+#dialogue-choices button {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white !important;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+#dialogue-choices button:hover {
+    background: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+#dialogue-choices button.selected {
+    background: rgba(255, 255, 100, 0.3);
+    border-color: yellow;
+}
+
+/* DOM Media Box */
+#media-box {
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, .75);
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 2px solid rgba(0, 0, 0, 0.3);
     padding: 20px;
-    width: 300px;
-    height: 200px;
-    display: none;
-    z-index: 3;
+    border-radius: 8px;
+    z-index: 20;
+    box-sizing: border-box;
+    text-align: center;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+#media-image {
+    max-width: 400px;
+    max-height: 400px;
+    display: block;
+    margin: 0 auto 15px auto;
+    border-radius: 4px;
+    background: transparent !important;
+}
+
+#close-media {
+    padding: 10px 30px;
+    background: rgba(0, 0, 0, 0.7) !important;
+    color: white !important;
+    border: none;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+#close-media:hover {
+    background: rgba(0, 0, 0, 0.9) !important;
 }
 
 #id {}

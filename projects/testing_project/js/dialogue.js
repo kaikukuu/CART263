@@ -39,10 +39,62 @@ function fetchDialogueData() {
         .then(data => {
             dialogueData = data;
             console.log("Dialogue data loaded:", data);
+            updateDialogueDisplay(); // Update DOM after data loads
         })
         .catch(error => {
             console.error('Failed to fetch data:', error);
         });
+}
+
+// DOM elements (will be initialized when dialogue system is set up)
+let dialogueTextElement = null;
+let dialogueChoicesElement = null;
+
+// Initialize DOM references
+function initDialogueDOM() {
+    dialogueTextElement = document.getElementById('dialogue-text');
+    dialogueChoicesElement = document.getElementById('dialogue-choices');
+}
+
+// Update dialogue display in DOM
+function updateDialogueDisplay() {
+    if (!dialogueTextElement) return;
+
+    const text = getCurrentDialogueText();
+    dialogueTextElement.textContent = text;
+
+    // Update choices
+    const choices = getCurrentDialogueChoices();
+    if (choices && choices.length > 0) {
+        showDialogueChoices(choices);
+    } else {
+        hideDialogueChoices();
+    }
+}
+
+// Show dialogue choices as buttons
+function showDialogueChoices(choices) {
+    if (!dialogueChoicesElement) return;
+
+    dialogueChoicesElement.innerHTML = ''; // Clear existing
+    dialogueChoicesElement.style.display = 'flex';
+
+    choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.textContent = choice;
+        button.dataset.choice = choice;
+        button.addEventListener('click', () => {
+            selectChoice(index);
+        });
+        dialogueChoicesElement.appendChild(button);
+    });
+}
+
+// Hide dialogue choices
+function hideDialogueChoices() {
+    if (!dialogueChoicesElement) return;
+    dialogueChoicesElement.style.display = 'none';
+    dialogueChoicesElement.innerHTML = '';
 }
 
 // Get current dialogue text
@@ -178,6 +230,9 @@ function advanceDialogue() {
             window.onDialogueBackgroundChange(null, null);
         }
     }
+
+    // Update DOM display after dialogue advances
+    updateDialogueDisplay();
 }
 
 // Set the current dialogue trigger
@@ -185,6 +240,7 @@ function setDialogueTrigger(trigger) {
     currentTrigger = trigger;
     currentDialogueIndex = 0;
     currentPartIndex = 0;
+    updateDialogueDisplay();
 }
 
 // Handle choice selection
@@ -215,65 +271,11 @@ function selectChoice(choiceIndex) {
     }
 }
 
-// Draw a dialogue box on the canvas
-function drawDialogueBox(canvas, context, boxHeight = 150) {
-    const text = getCurrentDialogueText();
-    const choices = getCurrentDialogueChoices();
-
-    // Position in bottom third of canvas
-    const boxWidth = canvas.width * 0.9;  // 90% of canvas width
-    const boxX = (canvas.width - boxWidth) / 2;
-    const boxY = canvas.height - boxHeight - 20;  // 20px from bottom
-
-    // Draw semi-transparent background box
-    context.fillStyle = "rgba(0, 0, 0, 0.7)";
-    context.fillRect(boxX, boxY, boxWidth, boxHeight);
-
-    // Draw border
-    context.strokeStyle = "rgba(255, 255, 255, 0.5)";
-    context.lineWidth = 2;
-    context.strokeRect(boxX, boxY, boxWidth, boxHeight);
-
-    // Draw text
-    context.fillStyle = "white";
-    context.font = "16px Roboto";
-    const padding = 20;
-    let textY = boxY + padding + 20;
-    const maxWidth = boxWidth - (padding * 2);
-    const textX = boxX + padding;
-
-    // Draw main dialogue text
-    context.fillText(text, textX, textY, maxWidth);
-
-    // Draw choices if available
-    if (choices && choices.length > 0) {
-        textY += 40; // Add space after main text
-
-        // Draw choice instructions
-        context.fillStyle = "yellow";
-        context.font = "14px Roboto";
-        context.fillText("Choose your path:", textX, textY);
-        textY += 25;
-
-        // Draw each choice
-        context.fillStyle = "white";
-        context.font = "16px Roboto";
-        choices.forEach((choice, index) => {
-            const choiceText = `${index === 0 ? '← Left:' : '→ Right:'} ${choice}`;
-            context.fillText(choiceText, textX + 20, textY);
-            textY += 25;
-        });
-
-        // Draw input hint
-        textY += 10;
-        context.fillStyle = "gray";
-        context.font = "12px Roboto";
-        context.fillText("Use ← → arrow keys to choose", textX, textY);
-    }
-}
-
 // Setup dialogue keyboard input
 function setupDialogueInput() {
+    // Initialize DOM element references
+    initDialogueDOM();
+
     document.addEventListener("keydown", function (event) {
         const choices = getCurrentDialogueChoices();
 

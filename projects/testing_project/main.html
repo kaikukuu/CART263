@@ -25,46 +25,22 @@
 </head>
 
 <body>
-    <canvas id="testCanvas" width=500 height=500>
-        <div id="non-interactive-text">
+    <canvas id="testCanvas" width=500 height=500></canvas>
 
-            <p>Item Viewer Box</p>
-            <p>Click item to open the media viewer box.</p>
-
+    <!-- Dialogue Box (DOM-based) -->
+    <div id="dialogue-box" style="display: none;">
+        <div id="dialogue-content">
+            <p id="dialogue-text">Press Start to begin...</p>
         </div>
-
-        <div id="dialogue-box">
-            <p>Dialogue Box</p>
-            <p>Character Name</p>
-
-            <div id="character-list">
-                <p>Title (Speaking characters)</p>
-                <p>Character 1</p>
-                <p>Character 2</p>
-            </div>
-            <div id="dialogue-text">
-                <p>Dialogue Text</p>
-                <div id="dialogue-options">
-                    <p>Option 1</p>
-                    <p>Option 2</p>
-                    <p>Option 3</p>
-                </div>
-
-            </div>
-
-    </canvas>
-
-    <div id="controls-box">
-        <p> Controls</p>
-        <div id="controls">
-            <p>Press enter to advance dialogue</p>
-            <p>Press 'm' to open media viewer box</p>
-            <p>Press 'd' to open dialogue box</p>
-            // Add more controls as needed
-            <p></p>
-
+        <div id="dialogue-choices" style="display: none;">
+            <!-- choice buttons will be dynamically inserted here -->
         </div>
+    </div>
 
+    <!-- Media/Item Viewer Box (DOM-based) -->
+    <div id="media-box" style="display: none;">
+        <img id="media-image" src="" alt="Item">
+        <button id="close-media">Close (Enter)</button>
     </div>
 
 </body>
