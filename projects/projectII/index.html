@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NEW DOM PAGE</title>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <script src="js/dialogue.js"></script>
+    <script src="js/script.js"></script>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1 id="start-title">title</h1>
+        <button id="start-button">Start</button>
+    </div>
+
+    <!-- End screen -->
+    <div id="end-screen" style="display: none;">
+        <h1>The End</h1>
+    </div>
+
+    <!-- Dialogue Box -->
+    <div id="dialogue-box" style="display: none;">
+        <div id="dialogue-content">
+            <p id="dialogue-text">Press Start to begin...</p>
+        </div>
+        <div id="dialogue-choices" style="display: none;">
+            <!-- choice buttons will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Media/Item Viewer Box -->
+    <div id="media-box" style="display: none;">
+        <img id="media-image" src="" alt="Item">
+        <button id="close-media">Close (Enter)</button>
+    </div>
+
+</body>
+
+</html>
