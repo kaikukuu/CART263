@@ -1,0 +1,9 @@
+Task 5 Response
+
+The project I am responding to is project 2 which was called ”Can you see me? Find the hidden presence”. The inspiration the team mentioned for their game is a game called Fireboy and Watergirl which was a really nostalgic game for me as I remember often playing it with my brother since we only had one computer and weren’t allowed to have a game console. The game is for two players sharing a computer/screen to control their characters using the same keyboard and simply two different control sets. The point of the game is essentially for the two characters to reunite through a maze or puzzle using their individual skills through certain tasks along the way. 
+
+For the implementation of the group's game I really liked the aspects of the two characters having some kind of visual and gameplay elements that distinguish them from one another. Having the screen start as dark to contrast with the glowing character and teleporting character mechanics lend well to the feeling of the game and has strong environmental storytelling. It gives the players some sort of challenge for them to find each other through the visuals and experiment with how to use the mechanics to find each other.
+
+I found the ideas they brought up about possible hide and seek elements also to be compelling, if the group wants to integrate more of a higher stress environment or a different type of gameplay. I liked the aesthetics visually, and the audio gave it an otherworldly feeling but not eerie. I think the code also provides a really strong foundation for building further elements of the game and creating a strong environment and setting the tone for the game/story. I would also be very interested to hear more stories about the game through playing.
+
+Group 2 - Running project: https://scarlett253.github.io/p1_cart263ys/

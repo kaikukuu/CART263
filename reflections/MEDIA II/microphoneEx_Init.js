@@ -10,6 +10,7 @@ async function getMicrophoneInput() {
     let canvas = document.getElementById("drawingCanvas");
     //get the context
     let context = canvas.getContext("2d");
+    let analyser = audioContext.createAnalyser();
 
 
     try {
@@ -23,7 +24,6 @@ async function getMicrophoneInput() {
         console.log(microphoneIn);
 
         const filter = audioContext.createBiquadFilter();
-        const analyser = audioContext.createAnalyser();
         // microphone -> filter ->  analyzer->destination
         microphoneIn.connect(filter);
         //use the analyzer object to get some properties ....
