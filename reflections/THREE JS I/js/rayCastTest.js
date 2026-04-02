@@ -47,24 +47,48 @@ const controls = new OrbitControls(camera, canvas)
 
 window.requestAnimationFrame(animate);
 
+// function animate(timer) {
+//     controls.update();
+
+//     object1.position.y = Math.sin(timer / 1000 * .5) * 3
+//     object2.position.y = Math.sin(timer / 1000 * .4) * 3
+//     object3.position.y = Math.sin(timer / 1000 * .3) * 3
+
+//     const objectsToTest = [object1, object2, object3]
+//     const intersects = raycaster.intersectObjects(objectsToTest)
+//     console.log(intersects)
+
+//     for (const object of objectsToTest) {
+//         object.material.color.set(0xffffff)
+//     }
+
+//     for (const intersect of intersects) {
+//         intersect.object.material.color.set(0xff0000)
+//     }
+
+//     renderer.render(scene, camera);
+//     window.requestAnimationFrame(animate);
+// }
+
 function animate(timer) {
     controls.update();
+    raycaster.setFromCamera(mouse, camera);
 
-    object1.position.y = Math.sin(timer / 1000 * .5) * 3
-    object2.position.y = Math.sin(timer / 1000 * .4) * 3
-    object3.position.y = Math.sin(timer / 1000 * .3) * 3
-
-    const objectsToTest = [object1, object2, object3]
-    const intersects = raycaster.intersectObjects(objectsToTest)
-    console.log(intersects)
+    const objectsToTest = [object1, object2, object3];
+    const intersects = raycaster.intersectObjects(objectsToTest);
 
     for (const object of objectsToTest) {
-        object.material.color.set(0xffffff)
+        object.material.color.set("#ff0000");
     }
 
-    for (const intersect of intersects) {
-        intersect.object.material.color.set(0xff0000)
+    if (intersects.length > 0) {
+        console.log("we have an intersection")
+        intersects[0].object.material.color.set("#00ff00");
     }
+
+    // for (const intersect of intersects) {
+    //     intersect.object.material.color.set("#0000ff");
+    // }
 
     renderer.render(scene, camera);
     window.requestAnimationFrame(animate);
@@ -81,3 +105,10 @@ console.log(rayDirection.length())
 rayDirection.normalize()
 console.log(rayDirection.length())
 raycaster.set(rayOrigin, rayDirection) //raycaster has been oriented
+
+let mouse = new THREE.Vector2(0, 0)
+window.addEventListener("mousemove", function (event) {
+    mouse.x = (event.clientX / sizes.width) * 2 - 1; //map to between -1,1
+    mouse.y = -(event.clientY / sizes.height) * 2 + 1; //map to between -1,1
+    //console.log(mouse);
+});
